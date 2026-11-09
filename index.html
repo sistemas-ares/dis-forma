@@ -1,0 +1,1951 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DIS para Forma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --negro:#000; --oliva:#636B69; --niebla:#989F9C; --blanco:#fff;
+    --linea:#DADDDC; --suave:#F3F4F4; --marca:#E9EBEA; --error:#8A2B2B; --ok:#3E5A47;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:13px/1.45 Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--negro);background:var(--blanco)}
+  header{padding:12px 14px 0;position:sticky;top:0;background:var(--blanco);z-index:2;border-bottom:1px solid var(--linea)}
+  h1{margin:0;font-size:15px;font-weight:700}
+  .sub{margin:2px 0 8px;color:var(--oliva);font-size:11.5px}
+  nav{display:flex;gap:0}
+  nav button{flex:1;border:0;border-bottom:2px solid transparent;background:none;padding:8px 4px;font:inherit;font-weight:500;color:var(--oliva);cursor:pointer}
+  nav button[aria-selected="true"]{color:var(--negro);border-bottom-color:var(--negro)}
+  main{padding:12px 14px 18px}
+  section[hidden]{display:none}
+  h2{margin:14px 0 6px;font-size:12.5px;font-weight:500;color:var(--oliva)}
+  h2:first-child{margin-top:0}
+  p.nota{margin:6px 0;font-size:11.5px;color:var(--oliva)}
+  .estado{font-size:11.5px;color:var(--oliva);margin:0 0 10px}
+  .estado.err{color:var(--error)}
+  .cifras{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .cifra{background:var(--suave);padding:8px 10px}
+  .cifra b{display:block;font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+  .cifra span{font-size:11px;color:var(--oliva)}
+  .cifra.grande{grid-column:1/-1}
+  .cifra.grande b{font-size:26px}
+  .cifra.valor{background:var(--marca)}
+  input.costo{width:110px}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:5px 4px;border-bottom:1px solid var(--linea);vertical-align:middle}
+  th{font-weight:500;color:var(--oliva);white-space:nowrap}
+  .n{text-align:right}
+  tfoot td{font-weight:700;border-bottom:0;border-top:1px solid var(--negro)}
+  .muestra{display:inline-block;width:9px;height:9px;margin-right:5px;vertical-align:-1px}
+  .grupo{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--linea)}
+  .grupo label{flex:1;cursor:pointer}
+  .grupo small{color:var(--oliva)}
+  .etq{font-size:10.5px;padding:1px 6px;background:var(--marca);color:var(--oliva)}
+  input[type=number],select{font:inherit;font-size:12px;padding:3px 4px;border:1px solid var(--linea);background:var(--blanco);width:100%}
+  input[type=number]{text-align:right}
+  input:focus-visible,select:focus-visible,button:focus-visible,textarea:focus-visible{outline:2px solid var(--oliva);outline-offset:1px}
+  .acciones{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+  button.btn{font:inherit;font-size:12.5px;padding:6px 11px;border:1px solid var(--negro);background:var(--negro);color:var(--blanco);cursor:pointer}
+  button.btn.sec{background:var(--blanco);color:var(--negro)}
+  textarea{width:100%;min-height:90px;font:11px/1.4 ui-monospace,Consolas,monospace;border:1px solid var(--linea);padding:6px;margin-top:6px}
+  .balance{margin-top:10px;padding:9px 10px;background:var(--suave);font-size:12px}
+  .balance b{font-variant-numeric:tabular-nums}
+  .falta{color:var(--error)} .sobra{color:var(--ok)}
+  .vacio{color:var(--niebla)}
+  .segm{display:flex;margin:14px 0 0;border:1px solid var(--negro)}
+  .segm button{flex:1;font:inherit;font-size:12px;padding:6px 4px;border:0;background:var(--blanco);color:var(--negro);cursor:pointer}
+  .segm button+button{border-left:1px solid var(--negro)}
+  .segm button[aria-pressed="true"]{background:var(--negro);color:var(--blanco)}
+  .segm.mini{margin:0;min-width:140px} .segm.mini button{padding:3px 4px;font-size:11.5px}
+  .interruptores{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .interruptores .segm{margin:3px 0 0}
+  .etq-int{font-size:11px;color:var(--oliva)}
+  tr.cab td{padding-top:10px;font-weight:700;border-bottom:1px solid var(--negro)}
+  tr.sub td{color:var(--oliva);font-weight:500;background:var(--suave)}
+  tr.sub-fuerte td{font-weight:700;background:var(--marca)}
+  .cifra[hidden]{display:none}
+  .edif{border:1px solid var(--linea);padding:8px 10px;margin-top:8px}
+  .edif-cab{font-size:12.5px;margin-bottom:4px}
+  tr.sel td{background:var(--marca)}
+  .ojo-c{width:48px;padding-left:0;padding-right:0;white-space:nowrap}
+  button.ojo.tr{color:var(--niebla)}
+  button.ojo.tr.si{color:var(--negro)}
+  button.ojo.tr.parcial{color:var(--oliva)}
+  button.ojo{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;padding:0;border:0;background:none;color:var(--negro);cursor:pointer}
+  button.ojo.oculto{color:var(--niebla)}
+  button.ojo.parcial{color:var(--oliva)}
+  button.ojo.parcial svg circle{opacity:.45}
+  button.ojo:hover{background:var(--suave)}
+  #btn-mostrar-todo[hidden]{display:none}
+  .campos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .campos label{font-size:11px;color:var(--oliva);display:grid;gap:2px}
+  .campos.dos{grid-template-columns:1fr 1fr}
+  input[type=file]{font:inherit;font-size:12px;max-width:100%}
+  .aviso{margin:8px 0;padding:7px 9px;background:#F6EDED;color:var(--error);font-size:11.5px}
+  .aviso.ok{background:#EAF0EC;color:var(--ok)}
+  details{margin-top:14px;border-top:1px solid var(--linea);padding-top:8px}
+  summary{cursor:pointer;font-size:12.5px;font-weight:500;color:var(--oliva)}
+  button.btn:disabled{opacity:.4;cursor:default}
+  code{font:11px ui-monospace,Consolas,monospace;background:var(--suave);padding:0 3px}
+</style>
+</head>
+<body>
+<header>
+  <h1>DIS para Forma <span style="font-weight:400;font-size:11px;color:var(--niebla)">v0.14 · costos y valores</span></h1>
+  <p class="sub" id="proyecto">Conectando con Forma…</p>
+  <nav role="tablist">
+    <button role="tab" aria-selected="true" data-tab="filtro">Edificios</button>
+    <button role="tab" aria-selected="false" data-tab="areas">Áreas</button>
+    <button role="tab" aria-selected="false" data-tab="estac">Valores</button>
+    <button role="tab" aria-selected="false" data-tab="dxf">DXF</button>
+  </nav>
+</header>
+
+<main>
+  <p class="estado" id="estado">Esperando datos.</p>
+
+  <!-- ============ FILTRO ============ -->
+  <section id="tab-filtro">
+    <h2>Capas con edificios</h2>
+    <p class="nota">Solo se cuantifican las capas marcadas. Las del entorno (base importada) vienen desmarcadas.</p>
+    <div id="grupos"><p class="vacio">Leyendo propuesta…</p></div>
+    <div class="acciones">
+      <button class="btn sec" id="btn-ver">Ver filtro en escena</button>
+      <button class="btn sec" id="btn-releer">Volver a leer</button>
+      <button class="btn sec" id="btn-diag">Copiar diagnóstico</button>
+    </div>
+    <p class="nota">El diagnóstico copia lo que Forma le entrega al panel (capas, métricas y la última selección leída), para revisar aquí cualquier dato que no cuadre.</p>
+
+    <h2 style="margin-top:18px">Funciones: privativa o común</h2>
+    <p class="nota">Define a qué suma va cada función. Se recuerda por nombre de función para todos los proyectos; las marcadas "auto" son la propuesta inicial del panel.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Función</th><th class="n">GFA m²</th><th>Tipo</th></tr></thead>
+      <tbody id="tb-clasif"></tbody>
+    </table></div>
+  </section>
+
+  <!-- ============ ÁREAS ============ -->
+  <section id="tab-areas" hidden>
+    <div class="cifras">
+      <div class="cifra"><b id="t-gfa">–</b><span>Área bruta construida, GFA (m²)</span></div>
+      <div class="cifra valor"><b id="t-val">–</b><span>Valor bruto (MXN)</span></div>
+      <div class="cifra"><b id="t-ren">–</b><span>Área privativa (m²)</span></div>
+      <div class="cifra valor"><b id="t-val-ren">–</b><span>Valor área privativa</span></div>
+      <div class="cifra"><b id="t-com">–</b><span>Áreas comunes (m²)</span></div>
+      <div class="cifra valor"><b id="t-val-com">–</b><span>Valor áreas comunes</span></div>
+      <div class="cifra"><b id="t-des">–</b><span>Desplante (m²)</span></div>
+      <div class="cifra"><b id="t-cos">–</b><span>COS sobre predio</span></div>
+      <div class="cifra"><b id="t-cus">–</b><span>CUS sobre predio</span></div>
+      <div class="cifra"><b id="t-uni">–</b><span>Unidades</span></div>
+      <div class="cifra"><b id="t-caj">–</b><span>Cajones modelados</span></div>
+      <div class="cifra"><b id="t-efi">–</b><span>Eficiencia (privativa / GFA)</span></div>
+    </div>
+    <p class="nota" id="nota-valor"></p>
+    <p class="nota" id="nota-predio"></p>
+
+    <div class="interruptores">
+      <div>
+        <span class="etq-int">Agrupar</span>
+        <div class="segm" role="group" aria-label="Agrupar áreas">
+          <button data-agrupar="completo" aria-pressed="true">Completo</button>
+          <button data-agrupar="nivel" aria-pressed="false">Por niveles</button>
+        </div>
+      </div>
+      <div>
+        <span class="etq-int">Áreas</span>
+        <div class="segm" role="group" aria-label="Tipo de áreas">
+          <button data-areas="totales" aria-pressed="true">Completas</button>
+          <button data-areas="desglose" aria-pressed="false">Privativa / común</button>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="h-func">Por función</h2>
+    <div class="scroll"><table>
+      <thead><tr><th class="ojo-c"></th><th>Función</th><th class="n">GFA m²</th><th class="n">%</th><th class="n">Unid.</th></tr></thead>
+      <tbody id="tb-func"></tbody>
+      <tfoot id="tf-func"></tfoot>
+    </table></div>
+    <p class="nota" id="nota-unid"></p>
+    <div id="nota-nivel" hidden>
+      <p class="nota">Nivel por cota de desplante: los volúmenes que desplantan en la cota más baja son N1; los que desplantan más arriba forman N2, N3… Las cotas que difieren menos que la tolerancia cuentan como el mismo nivel.</p>
+      <label class="nota" style="display:grid;grid-template-columns:1fr 70px;gap:6px;align-items:center">Tolerancia entre desplantes (m)
+        <input type="number" min="0.1" step="0.1" id="tol-nivel"></label>
+    </div>
+    <p class="nota">En cada fila, el ojo prende o apaga los volúmenes de esa fila (una función, un nivel, un subtotal o un edificio) y el círculo los vuelve translúcidos. Forma restablece todo al cerrar el panel.</p>
+    <label class="nota" style="display:grid;grid-template-columns:auto 1fr 42px;gap:8px;align-items:center">Opacidad de translúcidos
+      <input type="range" min="5" max="90" step="5" id="opacidad" aria-label="Opacidad de los volúmenes translúcidos"><span id="opacidad-v"></span></label>
+    <div class="acciones">
+      <button class="btn" id="btn-mostrar-todo" hidden>Mostrar todo</button>
+      <button class="btn sec" id="btn-vista-nivel">Ver niveles en escena</button>
+      <button class="btn sec" id="btn-vista-clase">Ver privativa / común en escena</button>
+    </div>
+
+    <h2>Otras métricas de Forma</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Métrica</th><th class="n">Total</th><th>Unidad</th></tr></thead>
+      <tbody id="tb-custom"></tbody>
+    </table></div>
+
+    <h2>Por edificio</h2>
+    <div class="scroll"><table>
+      <thead id="th-edif"></thead>
+      <tbody id="tb-edif"></tbody>
+    </table></div>
+    <div class="acciones">
+      <button class="btn sec" id="btn-tsv">Copiar tablas para Excel</button>
+    </div>
+  </section>
+
+  <!-- ============ ESTACIONAMIENTO ============ -->
+  <section id="tab-estac" hidden>
+    <h2>Costo por m² por función</h2>
+    <p class="nota">Captura el costo por m² de cada función; se guarda en este proyecto. Valor = GFA × costo. Privativa y común siguen la clasificación de la pestaña Edificios.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Función</th><th>Tipo</th><th class="n">GFA m²</th><th class="n">Costo $/m²</th><th class="n">Valor</th></tr></thead>
+      <tbody id="tb-costo"></tbody>
+      <tfoot id="tf-costo"></tfoot>
+    </table></div>
+
+    <h2 style="margin-top:20px">Estacionamiento</h2>
+    <h2>Demanda de Forma</h2>
+    <label class="nota" style="display:grid;gap:3px">Tomar la demanda de
+      <select id="dem-fuente"><option value="">Captura manual</option></select></label>
+    <p class="nota" id="dem-nota"></p>
+    <div class="scroll"><table>
+      <thead><tr><th>Función</th><th>Criterio</th><th class="n">Valor</th><th class="n">Req.</th></tr></thead>
+      <tbody id="tb-dem"></tbody>
+      <tfoot id="tf-dem"></tfoot>
+    </table></div>
+
+    <h2>Equivalente normativo</h2>
+    <p class="nota" id="norma-info">Sin tabla normativa cargada. Usa "Exportar para revisión normativa" y trae de vuelta la tabla en JSON.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>Función</th><th>Uso en reglamento</th><th class="n">Req.</th></tr></thead>
+      <tbody id="tb-norma"></tbody>
+      <tfoot id="tf-norma"></tfoot>
+    </table></div>
+
+    <h2>Estacionamientos trazados</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Estacionamiento</th><th class="n">Área m²</th><th class="n">Cajones</th><th>Fuente</th></tr></thead>
+      <tbody id="tb-estac"></tbody>
+    </table></div>
+    <label class="nota" id="lbl-m2caj" hidden style="display:grid;grid-template-columns:1fr 70px;gap:6px;align-items:center">Para estimar los que Forma no cuantifica: m² por cajón, incluida circulación
+      <input type="number" min="10" step="0.5" id="m2-cajon"></label>
+
+    <div class="balance" id="balance"></div>
+
+    <div class="acciones">
+      <button class="btn" id="btn-export">Exportar para revisión normativa</button>
+      <button class="btn sec" id="btn-cargar">Cargar tabla normativa</button>
+    </div>
+    <textarea id="txt" hidden aria-label="Intercambio de datos en JSON"></textarea>
+    <div class="acciones" id="acc-txt" hidden>
+      <button class="btn" id="btn-aplicar">Aplicar tabla</button>
+      <button class="btn sec" id="btn-cerrar">Cerrar</button>
+    </div>
+  </section>
+
+  <!-- ============ DXF ============ -->
+  <section id="tab-dxf" hidden>
+    <h2>Origen del trazo</h2>
+    <div class="campos dos" role="group" aria-label="Origen del trazo">
+      <button class="btn" id="src-escena" aria-pressed="true">Desde la escena</button>
+      <button class="btn sec" id="src-archivo" aria-pressed="false">Desde archivo DXF</button>
+    </div>
+    <div id="bloque-escena">
+      <p class="nota">Importa el DXF o DWG a Forma con su herramienta nativa, selecciónalo en la escena y lee la selección. Como ya está colocado, no hay que georreferenciar.</p>
+      <div class="acciones"><button class="btn sec" id="btn-leer-sel">Leer selección</button></div>
+    </div>
+    <div id="bloque-archivo" hidden>
+      <input type="file" id="dxf-file" accept=".dxf" aria-label="Archivo DXF" style="margin-top:4px">
+    </div>
+    <p class="nota" id="dxf-info"></p>
+
+    <div id="dxf-cuerpo" hidden>
+      <h2>Capas</h2>
+      <p class="nota">La asignación capa → tipo se recuerda para todos los proyectos: si el equipo usa las mismas capas, solo se configura una vez.</p>
+      <div class="scroll"><table>
+        <thead><tr><th>Capa</th><th class="n">Polígonos</th><th>Usar como</th></tr></thead>
+        <tbody id="tb-capas"></tbody>
+      </table></div>
+
+      <div id="bloque-ubic">
+        <h2>Ubicación</h2>
+        <div class="campos dos">
+          <label>Coordenadas del DXF
+            <select id="dxf-modo">
+              <option value="proyecto">Mismo sistema que Forma (UTM)</option>
+              <option value="local">Locales: colocar manualmente</option>
+            </select></label>
+          <label>Unidades
+            <select id="dxf-unid">
+              <option value="auto">Según el archivo</option>
+              <option value="1">Metros</option>
+              <option value="0.01">Centímetros</option>
+              <option value="0.001">Milímetros</option>
+            </select></label>
+        </div>
+        <div class="campos" id="dxf-manual" hidden style="margin-top:6px">
+          <label>Desplazar X (m)<input type="number" step="any" id="dxf-dx" value="0"></label>
+          <label>Desplazar Y (m)<input type="number" step="any" id="dxf-dy" value="0"></label>
+          <label>Rotar (°)<input type="number" step="any" id="dxf-rot" value="0"></label>
+        </div>
+        <div id="dxf-ubic"></div>
+      </div>
+
+      <div id="bloque-edif" hidden>
+        <h2>Edificios</h2>
+        <p class="nota">Cada polilínea cerrada en <code>AR-EDIF-PERIMETRO</code> es un edificio; las líneas en <code>AR-EDIF-DIVISION</code> dentro de él lo subdividen en unidades. Las divisiones deben ir a eje, en una sola línea.</p>
+        <div id="lista-edif"></div>
+      </div>
+
+      <div id="bloque-pads" hidden>
+        <h2>Plataformas</h2>
+        <div class="campos dos">
+          <label>Talud perimetral
+            <select id="pad-talud-on"><option value="1">Con talud</option><option value="0">Sin talud (corte vertical)</option></select></label>
+          <label>Talud H:V (horizontal por 1 vertical)<input type="number" step="0.1" min="0.1" id="pad-talud" value="1.5"></label>
+        </div>
+        <div class="scroll"><table>
+          <thead><tr><th>Plataforma</th><th class="n">Área m²</th><th class="n">Terreno m</th><th class="n">Nivel m</th></tr></thead>
+          <tbody id="tb-pads"></tbody>
+        </table></div>
+        <p class="nota">Nivel: el de la polilínea si tiene elevación; si no, el promedio del terreno bajo la plataforma. Edítalo para probar alternativas.</p>
+        <div id="pad-aviso"></div>
+      </div>
+
+      <h2>Límites de predio</h2>
+      <label class="nota" style="display:grid;gap:3px">Crear los límites como
+        <select id="lim-metodo">
+          <option value="nativo">Límite nativo de Forma (importación de linderos)</option>
+          <option value="elemento">Elemento con plantilla</option>
+        </select></label>
+
+      <div class="acciones">
+        <button class="btn sec" id="btn-prev">Previsualizar en escena</button>
+        <button class="btn" id="btn-dxf-aplicar">Aplicar</button>
+      </div>
+      <div id="dxf-res"></div>
+
+      <details>
+        <summary>Plantillas de límite y zona</summary>
+        <p class="nota">Si los límites o zonas creados no se comportan como los nativos, dibuja uno a mano en Forma, selecciónalo y guárdalo como plantilla: las siguientes importaciones copiarán sus propiedades.</p>
+        <div class="acciones">
+          <button class="btn sec" data-plantilla="limite">Usar selección como límite</button>
+          <button class="btn sec" data-plantilla="zona">Usar selección como zona</button>
+        </div>
+        <p class="nota" id="pl-info"></p>
+      </details>
+    </div>
+
+    <div id="bloque-hist">
+      <h2>Aplicaciones en esta propuesta</h2>
+      <div id="hist-lista"><p class="vacio">Todavía no hay nada aplicado.</p></div>
+      <div class="acciones"><button class="btn sec" id="btn-dxf-volver" disabled>Volver: deshacer la última</button></div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { Forma } from "https://esm.sh/forma-embedded-view-sdk@0.96.0/auto";
+import DxfParser from "https://esm.sh/dxf-parser@1.1.2";
+
+/* ---------- utilidades ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num = v => (typeof v === "number" && isFinite(v)) ? v : NaN;
+const fmt = (v, d=0) => isFinite(v) ? v.toLocaleString("es-MX",{minimumFractionDigits:d,maximumFractionDigits:d}) : "–";
+const val = m => num(m?.value);
+function estado(t, err=false){ const e=$("estado"); e.textContent=t; e.classList.toggle("err",err); }
+
+const PID = Forma.getProjectId();
+const KEY = k => `dis-forma:${PID}:${k}`;
+const guardar = (k,v) => { try{ localStorage.setItem(KEY(k), JSON.stringify(v)); }catch(_){} };
+const cargar  = (k,d) => { try{ const v=localStorage.getItem(KEY(k)); return v?JSON.parse(v):d; }catch(_){ return d; } };
+const GKEY = k => `dis-forma:global:${k}`;
+const guardarG = (k,v) => { try{ localStorage.setItem(GKEY(k), JSON.stringify(v)); }catch(_){} };
+const cargarG  = (k,d) => { try{ const v=localStorage.getItem(GKEY(k)); return v?JSON.parse(v):d; }catch(_){ return d; } };
+
+/* ---------- estado ---------- */
+const S = {
+  proyecto:null, geo:null, pais:null, rootUrn:null,
+  grupos:[],            // {key, nombre, esBase, paths:[]}
+  incluir: cargar("incluir", null),   // {grupoKey:bool}
+  edificios:[],         // {path, nombre, grupo, gfa, des, uni, funciones:[]}
+  totales:null,
+  funciones:[],         // de settings
+  demanda: cargar("demanda", {}),
+  demFuente: cargar("dem-fuente", ""),  // id de una métrica de Forma o "" = manual     // {functionId:{modo:'m2'|'unidad', valor}}
+  norma: cargar("norma", null),
+  mapeo: cargar("mapeo", {}),         // {functionId: usoId}
+  verEscena:false
+};
+
+/* ---------- pestañas ---------- */
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.setAttribute("aria-selected", x===b));
+  ["filtro","areas","estac","dxf"].forEach(t=>$("tab-"+t).hidden = t!==b.dataset.tab);
+}));
+
+/* ---------- lectura de la propuesta ---------- */
+async function pathsDeEdificios(){
+  const set = new Set();
+  for(const c of ["building","buildings"]){
+    try{ (await Forma.geometry.getPathsByCategory({category:c})).forEach(p=>set.add(p)); }catch(_){}
+  }
+  // quedarse solo con el nivel superior (descartar subelementos de un edificio)
+  const todos=[...set].sort();
+  return todos.filter(p=>!todos.some(q=>q!==p && p.startsWith(q+"/")));
+}
+
+function nombreDe(el, child){
+  return child?.name || el?.properties?.name || null;
+}
+
+async function leerArbol(){
+  S.rootUrn = await Forma.proposal.getRootUrn();
+  const { element:root, elements } = await Forma.elements.get({ urn:S.rootUrn, recursive:true });
+  const porUrn = elements || {};
+  // resuelve un path "root/a/b" a la cadena de [child, element]
+  const resolver = path => {
+    const segs = path.split("/").slice(1);
+    const cadena=[]; let el=root;
+    for(const k of segs){
+      const ch = el?.children?.find(c=>c.key===k);
+      if(!ch) break;
+      el = porUrn[ch.urn];
+      cadena.push({child:ch, el});
+    }
+    return cadena;
+  };
+  S.arbol = { root, porUrn };
+  S.raiz = (root?.children||[]).map(ch=>{
+    const el=porUrn[ch.urn];
+    return { key:ch.key, path:`root/${ch.key}`, nombre: ch.name || el?.properties?.name || el?.properties?.category || ch.key,
+             categoria: el?.properties?.category ?? null, reps:Object.keys(el?.representations||{}) };
+  });
+  return resolver;
+}
+
+// Todo lo de la propuesta salvo el entorno: edificios incluidos, estacionamientos, límites, zonas…
+function pathsPropuesta(){
+  return (S.raiz||[]).filter(h=>{
+    const g=S.grupos.find(g=>g.key===h.key);
+    if(g) return !!S.incluir[g.key];
+    if(S.edificios.some(e=>e.path===h.path)) return !!S.incluir["__propuesta"];
+    return !/base/i.test(h.nombre);
+  }).map(h=>h.path);
+}
+
+async function leer(){
+  estado("Leyendo propuesta…");
+  try{
+    S.proyecto = await Forma.project.get();
+    try{ S.geo = await Forma.project.getGeoLocation(); }catch(_){}
+    S.pais = S.proyecto?.countryCode ?? null;
+    const geoTxt = S.geo ? ` · ${S.geo[0].toFixed(5)}, ${S.geo[1].toFixed(5)}` : "";
+    $("proyecto").textContent = `${S.proyecto?.name ?? "Proyecto"}${geoTxt}`;
+
+    try{ S.funciones = (await Forma.settings.get()).buildingFunctions || []; }catch(_){ S.funciones=[]; }
+
+    const resolver = await leerArbol();
+    const paths = await pathsDeEdificios();
+
+    const grupos = new Map();
+    S.edificios = paths.map((p,i)=>{
+      const cadena = resolver(p);
+      const top = cadena[0];
+      const esDirecto = cadena.length === 1;   // edificio colgado directo de la propuesta
+      const gk = esDirecto ? "__propuesta" : (top?.child.key ?? "?");
+      if(!grupos.has(gk)){
+        const nombre = esDirecto ? "Edificios" : (nombreDe(top?.el, top?.child) || top?.el?.properties?.category || "Grupo sin nombre");
+        grupos.set(gk, { key:gk, nombre, esBase: !esDirecto && /base/i.test(nombre), paths:[] });
+      }
+      grupos.get(gk).paths.push(p);
+      const ult = cadena[cadena.length-1];
+      return { path:p, grupo:gk, nombre: nombreDe(ult?.el, ult?.child) || `Edificio ${i+1}` };
+    });
+    S.grupos=[...grupos.values()].sort((a,b)=>a.esBase-b.esBase);
+    if(!S.incluir) S.incluir = {};
+    S.grupos.forEach(g=>{ if(!(g.key in S.incluir)) S.incluir[g.key] = !g.esBase; });
+
+    pintarGrupos();
+    await calcular();
+  }catch(err){
+    console.error(err);
+    estado(`No se pudo leer la propuesta: ${err?.message ?? err}`, true);
+  }
+}
+
+function incluidos(){ return S.edificios.filter(e=>S.incluir[e.grupo]); }
+
+async function calcular(){
+  const inc = incluidos();
+  if(!inc.length){
+    S.totales=null; pintarTodo();
+    estado("No hay edificios incluidos. Marca al menos una capa en la pestaña Edificios.", true);
+    return;
+  }
+  estado(`Calculando métricas de ${inc.length} edificio(s)…`);
+  // nunca llamar con paths vacíos: Forma lo interpreta como "todos los elementos".
+  // Los totales incluyen todo lo de la propuesta (cajones, límites, zonas), no solo edificios.
+  const pp=pathsPropuesta();
+  S.totales = await Forma.areaMetrics.calculate({ paths: pp.length ? pp : inc.map(e=>e.path) });
+  S.cajonesDeEscena=false;
+  if(!(num(S.totales?.parkingStatistics?.spots)>0)){
+    try{
+      const todo = await Forma.areaMetrics.calculate({});
+      if(num(todo?.parkingStatistics?.spots)>0){ S.totales.parkingStatistics = todo.parkingStatistics; S.cajonesDeEscena=true; }
+    }catch(_){}
+  }
+  await detectarEstacionamientos();
+  for(const e of inc){
+    try{
+      const m = await Forma.areaMetrics.calculate({ paths:[e.path] });
+      e.gfa = val(m.builtInMetrics.grossFloorArea);
+      e.des = val(m.builtInMetrics.buildingCoverage);
+      e.uni = val(m.unitStatistics?.count);
+      e.funciones = (m.builtInMetrics.grossFloorArea.functionBreakdown||[])
+        .map(f=>({id:f.functionId, nombre:f.functionName, color:f.functionColor, gfa:num(f.value)}))
+        .filter(f=>isFinite(f.gfa) && f.gfa>0);
+      if(!isFinite(e.gfa) && e.funciones.length) e.gfa=e.funciones.reduce((s,f)=>s+f.gfa,0);
+    }catch(_){ e.gfa=e.des=e.uni=NaN; e.funciones=[]; }
+    await unidadesDeEdificio(e);
+    await geometriaEdificio(e);
+  }
+  asignarNiveles(inc);
+  pintarTodo();
+  estado(`Listo: ${inc.length} edificio(s) de la propuesta. ${S.edificios.length-inc.length} excluido(s) del entorno.`);
+  if(S.verEscena) colorearEscena(); else if(S.vista) colorearVista();
+}
+
+/* ---------- pintado: filtro ---------- */
+function pintarGrupos(){
+  $("grupos").innerHTML = S.grupos.length ? S.grupos.map(g=>`
+    <div class="grupo">
+      <input type="checkbox" id="g-${esc(g.key)}" data-k="${esc(g.key)}" ${S.incluir[g.key]?"checked":""}>
+      <label for="g-${esc(g.key)}">${esc(g.nombre)} <small>· ${g.paths.length} edificio(s)</small></label>
+      ${g.esBase?'<span class="etq">entorno</span>':''}
+    </div>`).join("") : '<p class="vacio">La propuesta no tiene edificios.</p>';
+  $("grupos").querySelectorAll("input").forEach(i=>i.addEventListener("change", ()=>{
+    S.incluir[i.dataset.k]=i.checked; guardar("incluir", S.incluir); calcular();
+  }));
+}
+
+async function colorearEscena(){
+  const m = new Map();
+  S.edificios.forEach(e=>m.set(e.path, S.incluir[e.grupo] ? "#636B69" : "#D5D8D7"));
+  try{ await Forma.render.elementColors.clearAll(); await Forma.render.elementColors.set({ pathsToColor:m }); }catch(err){ console.error(err); }
+}
+$("btn-ver").addEventListener("click", async ()=>{
+  S.verEscena=!S.verEscena; S.vista=null; botonesVista();
+  $("btn-ver").textContent = S.verEscena ? "Quitar colores de la escena" : "Ver filtro en escena";
+  if(S.verEscena) colorearEscena(); else { try{ await Forma.render.elementColors.clearAll(); }catch(_){} }
+});
+$("btn-releer").addEventListener("click", leer);
+$("btn-diag").addEventListener("click", async ()=>{
+  const diag={
+    sdk:"forma-embedded-view-sdk@0.96.0", fecha:new Date().toISOString(),
+    raiz:S.raiz, grupos:S.grupos.map(g=>({key:g.key,nombre:g.nombre,incluido:!!S.incluir[g.key],edificios:g.paths.length})),
+    pathsPropuesta:pathsPropuesta(),
+    metricas:S.totales,
+    estacionamientos:S.estac,
+    edificios:incluidos().map(e=>({nombre:e.nombre,gfa:e.gfa,unidades:e.uni,fuenteUnid:e.fuenteUnid,unidadesFn:e.unidadesFn})),
+    seleccionDxf:S.diagSel ?? null
+  };
+  await copiar(JSON.stringify(diag,null,1), "Diagnóstico copiado. Pégalo en el chat de Claude.");
+});
+
+/* ---------- agregados por función ---------- */
+function funcionesTotales(){
+  const fb = S.totales?.builtInMetrics?.grossFloorArea?.functionBreakdown || [];
+  return fb.map(f=>({id:f.functionId, nombre:f.functionName, color:f.functionColor, gfa:num(f.value)}))
+           .filter(f=>isFinite(f.gfa) && f.gfa>0)
+           .sort((a,b)=>b.gfa-a.gfa);
+}
+
+// Unidades por función: las unidades de cada edificio se asignan solo a funciones
+// configuradas "por unidad", en proporción a su GFA dentro de ese edificio.
+// Unidades por función de cada edificio: se leen del modelo de unidades de Forma (graphBuilding),
+// que asigna una función a cada unidad. Si el edificio no lo trae, se prorratea por GFA.
+async function unidadesDeEdificio(e){
+  e.unidadesFn={}; e.fuenteUnid=null; e.subdiv=null;
+  const principal = (e.funciones||[]).slice().sort((a,b)=>b.gfa-a.gfa)[0]?.id;
+  // 1) Subdivisiones del volumen (modelo de unidades de Forma: unidades → espacios → plantas)
+  try{
+    const { element } = await Forma.elements.getByPath({ path:e.path });
+    if(element?.representations?.graphBuilding){
+      const gb = await Forma.elements.representations.graphBuilding({ urn:element.urn });
+      const r = contarSubdivisiones(gb?.data, principal);
+      if(r.total>0){ e.unidadesFn=r.porFuncion; e.subdiv=r; e.fuenteUnid = r.subdividido ? "subdivision" : "volumen"; }
+    }
+  }catch(_){}
+  // 2) Unidades reportadas por Forma sin modelo legible: se reparten por GFA
+  if(!e.fuenteUnid && isFinite(e.uni) && e.uni>0 && e.funciones?.length){
+    const tot=e.funciones.reduce((s,f)=>s+f.gfa,0);
+    e.funciones.forEach(f=>{ e.unidadesFn[f.id]=e.uni*f.gfa/tot; });
+    e.fuenteUnid="prorrateo";
+  }
+  // 3) Volumen sin subdividir: 1 unidad por función
+  if(!e.fuenteUnid && e.funciones?.length){
+    e.funciones.forEach(f=>{ e.unidadesFn[f.id]=1; });
+    e.fuenteUnid="volumen";
+  }
+}
+
+// Cada subdivisión cuenta como una unidad. Las plantas completas sin subdividir (una sola
+// unidad en toda la planta) de una misma función se cuentan juntas como una sola unidad,
+// para que un volumen de 3 plantas sin dividir no cuente como 3.
+function contarSubdivisiones(gb, principal){
+  const res={ total:0, porFuncion:{}, subdividido:false, plantas:0 };
+  if(!gb?.units?.length) return res;
+  const nivelDeEspacio={};
+  (gb.levels||[]).forEach((lv,i)=>(lv.spaces||[]).forEach(sp=>{ nivelDeEspacio[sp.id]=i; }));
+  res.plantas=(gb.levels||[]).length;
+  const unidades=gb.units
+    .filter(u=>!/CORE|CORRIDOR|CIRCULA|PARK/i.test(u.properties?.program||""))
+    .map(u=>({ fn:u.properties?.function || principal || "?",
+               niveles:[...new Set((u.spaceIds||[]).map(id=>nivelDeEspacio[id]).filter(v=>v!=null))] }));
+  const porNivel={};
+  unidades.forEach(u=>u.niveles.forEach(n=>{ porNivel[n]=(porNivel[n]||0)+1; }));
+  const plantaCompleta = u => u.niveles.length>0 && u.niveles.every(n=>porNivel[n]===1);
+  const fnPlantas=new Set();
+  for(const u of unidades){
+    if(plantaCompleta(u)){ fnPlantas.add(u.fn); continue; }
+    res.porFuncion[u.fn]=(res.porFuncion[u.fn]||0)+1; res.subdividido=true;
+  }
+  fnPlantas.forEach(fn=>{ res.porFuncion[fn]=(res.porFuncion[fn]||0)+1; });
+  res.total=Object.values(res.porFuncion).reduce((s,n)=>s+n,0);
+  return res;
+}
+/* ---------- geometría y niveles por apilamiento ---------- */
+async function geometriaEdificio(e){
+  e.huella=null; e.zmin=NaN; e.zmax=NaN;
+  let bb=null;
+  try{
+    const tri=await Forma.geometry.getTriangles({ path:e.path });
+    let zmin=Infinity,zmax=-Infinity,xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity;
+    for(let i=0;i<tri.length;i+=3){
+      const x=tri[i],y=tri[i+1],z=tri[i+2];
+      if(z<zmin)zmin=z; if(z>zmax)zmax=z; if(x<xmin)xmin=x; if(x>xmax)xmax=x; if(y<ymin)ymin=y; if(y>ymax)ymax=y;
+    }
+    if(isFinite(zmin)){ e.zmin=zmin; e.zmax=zmax; bb=[[xmin,ymin],[xmax,ymin],[xmax,ymax],[xmin,ymax]]; }
+  }catch(_){}
+  try{
+    const fp=await Forma.geometry.getFootprint({ path:e.path });
+    if(fp?.type==="Polygon" && fp.coordinates.length>=3) e.huella=fp.coordinates;
+  }catch(_){}
+  if(!e.huella) e.huella=bb;     // respaldo: caja envolvente en planta
+}
+function dentro([x,y], P){
+  let d=false;
+  for(let i=0,j=P.length-1;i<P.length;j=i++){
+    const [xi,yi]=P[i],[xj,yj]=P[j];
+    if(((yi>y)!==(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) d=!d;
+  }
+  return d;
+}
+// ¿Se enciman en planta? Muestreo en rejilla: tocarse por un borde no cuenta, compartir superficie sí.
+function seEnciman(P,Q){
+  if(!P || !Q) return false;
+  const bx=P.map(p=>p[0]), by=P.map(p=>p[1]), qx=Q.map(p=>p[0]), qy=Q.map(p=>p[1]);
+  if(Math.max(...bx)<=Math.min(...qx) || Math.max(...qx)<=Math.min(...bx) ||
+     Math.max(...by)<=Math.min(...qy) || Math.max(...qy)<=Math.min(...by)) return false;
+  const muestra=(A,B)=>{
+    const ax=A.map(p=>p[0]), ay=A.map(p=>p[1]);
+    const x0=Math.min(...ax), x1=Math.max(...ax), y0=Math.min(...ay), y1=Math.max(...ay), n=9;
+    let enA=0, enAmbos=0;
+    for(let i=0;i<n;i++) for(let j=0;j<n;j++){
+      const pt=[x0+(x1-x0)*(i+0.5)/n, y0+(y1-y0)*(j+0.5)/n];
+      if(!dentro(pt,A)) continue; enA++;
+      if(dentro(pt,B)) enAmbos++;
+    }
+    return enA>0 && enAmbos/enA >= 0.05;
+  };
+  return muestra(P,Q) || muestra(Q,P);
+}
+// Niveles por cota de desplante: los volúmenes cuya base cae dentro de la tolerancia
+// de la cota más baja forman N1; el siguiente grupo de cotas forma N2, y así hacia arriba.
+const tolNivel = () => { const v=parseFloat(cargarG("tol-nivel", 1)); return v>0 ? v : 1; };
+function asignarNiveles(lista){
+  lista.forEach(e=>{ e.nivel=null; e.apoyo=null; });
+  const orden=lista.filter(e=>isFinite(e.zmin)).sort((a,b)=>a.zmin-b.zmin);
+  S.cotasNivel=[];
+  let base=null;
+  for(const e of orden){
+    if(base===null || e.zmin-base > tolNivel()){ base=e.zmin; S.cotasNivel.push(base); }   // nueva cota → nuevo nivel
+    e.nivel=S.cotasNivel.length;
+  }
+}
+
+/* ---------- rentable / común ---------- */
+S.clasif = cargarG("clasif-funciones", {});      // nombre de función (minúsculas) → 'rentable' | 'comun'
+const RX_COMUN = /circul|pasillo|com[uú]n|sanit|ba[ñn]o|servicio|n[uú]cleo|core|escalera|elevad|andador|vest[ií]bulo|lobby|m[aá]quinas|and[eé]n|carga|mall|plaza/i;
+const claseDe = nombre => S.clasif[String(nombre).toLowerCase()] ?? (RX_COMUN.test(nombre) ? "comun" : "rentable");
+const gfaClase = (e, clase) => (e.funciones||[]).filter(f=>claseDe(f.nombre)===clase).reduce((s,f)=>s+f.gfa,0);
+
+/* ---------- estacionamientos trazados con la herramienta P ---------- */
+const RX_ESTAC = /park|estacion|aparca|cajon|cajón/i;
+const RX_PLAZAS = /spot|stall|plaza|cajon|cajón|space|capacity|count|num/i;
+// Recorre la propuesta (sin el entorno) y mide cada estacionamiento por separado
+async function detectarEstacionamientos(){
+  S.estac=[];
+  const { root, porUrn } = S.arbol || {};
+  if(!root) return;
+  const excl = new Set(S.grupos.filter(g=>!S.incluir[g.key] && g.key!=="__propuesta").map(g=>g.key));
+  const pila=(root.children||[]).filter(ch=>!excl.has(ch.key)).map(ch=>({ ch, path:`root/${ch.key}` }));
+  let vistos=0;
+  while(pila.length && vistos<5000){
+    const { ch, path } = pila.pop(); vistos++;
+    const el=porUrn[ch.urn];
+    const nombre = ch.name || el?.properties?.name || "";
+    const cat = el?.properties?.category || "";
+    if(RX_ESTAC.test(cat) || (RX_ESTAC.test(nombre) && !/building/i.test(cat))){
+      const r={ path, nombre: nombre || cat, categoria:cat, reps:Object.keys(el?.representations||{}) };
+      try{
+        const m=await Forma.areaMetrics.calculate({ paths:[path] });
+        r.plazasForma=num(m?.parkingStatistics?.spots); r.areaForma=num(m?.parkingStatistics?.area);
+      }catch(_){}
+      // plazas guardadas como propiedad del elemento
+      const props=el?.properties||{};
+      const kp=Object.keys(props).find(k=>RX_PLAZAS.test(k) && typeof props[k]==="number" && props[k]>0);
+      if(kp){ r.plazasProp=props[kp]; r.campoProp=kp; }
+      r.propsEjemplo=Object.fromEntries(Object.entries(props).filter(([,v])=>typeof v!=="object").slice(0,20));
+      try{
+        const fp=await Forma.geometry.getFootprint({ path });
+        if(fp?.type==="Polygon") r.areaHuella=Math.abs(areaPol(fp.coordinates));
+      }catch(_){}
+      r.plazas = r.plazasForma>0 ? r.plazasForma : (r.plazasProp>0 ? r.plazasProp : NaN);
+      r.fuente = r.plazasForma>0 ? "Forma" : (r.plazasProp>0 ? `propiedad ${r.campoProp}` : null);
+      S.estac.push(r);
+      continue;   // no bajar dentro de un estacionamiento: sus piezas son sus plazas
+    }
+    for(const c of el?.children||[]) pila.push({ ch:c, path:`${path}/${c.key}` });
+  }
+  const suma=S.estac.reduce((s,r)=>s+(isFinite(r.plazas)?r.plazas:0),0);
+  const actual=num(S.totales?.parkingStatistics?.spots);
+  if(suma>0 && !(actual>=suma)){
+    S.totales.parkingStatistics = { spots:suma, area:S.estac.reduce((s,r)=>s+(r.areaForma>0?r.areaForma:0),0) || NaN };
+  }
+}
+function areaPol(c){ let a=0; for(let i=0;i<c.length;i++){ const [x1,y1]=c[i],[x2,y2]=c[(i+1)%c.length]; a+=x1*y2-x2*y1; } return a/2; }
+// Si Forma no da plazas, se estiman desde el área trazada con un índice editable
+const m2PorCajon = () => parseFloat(cargar("m2-cajon", 25)) || 25;
+function plazasEstimadas(){
+  return S.estac.filter(r=>!isFinite(r.plazas) && r.areaHuella>0).reduce((s,r)=>s+Math.floor(r.areaHuella/m2PorCajon()),0);
+}
+
+const unidadesEdif = e => Object.values(e.unidadesFn||{}).reduce((s,n)=>s+n,0);
+// une la clave de función de la unidad (id o nombre) con las funciones de Forma
+function idFuncion(k){
+  const fs=funcionesTotales(), l=String(k).toLowerCase();
+  return (fs.find(f=>String(f.id).toLowerCase()===l || f.nombre.toLowerCase()===l)
+       || S.funciones.find(f=>String(f.id).toLowerCase()===l || f.name.toLowerCase()===l))?.id ?? k;
+}
+function unidadesPorFuncion(){
+  const r={};
+  for(const e of incluidos()) for(const [k,n] of Object.entries(e.unidadesFn||{})){ const id=idFuncion(k); r[id]=(r[id]||0)+n; }
+  return r;
+}
+
+/* ---------- pintado: áreas ---------- */
+function pintarAreas(){
+  const t=S.totales?.builtInMetrics;
+  let gfa=val(t?.grossFloorArea); const des=val(t?.buildingCoverage), predio=val(t?.siteArea);
+  if(!isFinite(gfa)){ const fs0=funcionesTotales(); if(fs0.length) gfa=fs0.reduce((s,f)=>s+f.gfa,0); }
+  $("t-gfa").textContent=fmt(gfa); $("t-des").textContent=fmt(des);
+  $("t-uni").textContent=fmt(incluidos().reduce((s,e)=>s+unidadesEdif(e),0));
+  { const r=num(S.totales?.parkingStatistics?.spots), e=plazasEstimadas();
+    $("t-caj").textContent = e ? `${fmt((isFinite(r)?r:0)+e)}*` : fmt(r); }
+  const hayPredio = isFinite(predio) && predio>0;
+  $("t-cos").textContent = hayPredio ? fmt(des/predio,2) : "–";
+  $("t-cus").textContent = hayPredio ? fmt(gfa/predio,2) : "–";
+  $("nota-predio").textContent = hayPredio ? `Predio: ${fmt(predio)} m² (límite de predio dibujado en Forma).`
+                                           : "Sin límite de predio en la propuesta: COS y CUS no se pueden calcular.";
+  const caj=num(S.totales?.parkingStatistics?.spots);
+  $("nota-predio").textContent += !(caj>0)
+    ? ((S.estac||[]).length
+        ? ` Se encontraron ${S.estac.length} estacionamiento(s) trazados, pero Forma no les asigna cajones. Revisa la pestaña Cajones.`
+        : " No se encontraron estacionamientos en la propuesta.")
+    : (S.cajonesDeEscena ? " Cajones tomados de toda la escena." : "");
+  if(plazasEstimadas()) $("nota-predio").textContent += ` * Incluye ≈${fmt(plazasEstimadas())} cajones estimados por área (${fmt(m2PorCajon(),1)} m² por cajón).`;
+  const fs=funcionesTotales();
+  const ux=unidadesPorFuncion();
+  const inc0=incluidos();
+  const desg=S.modoAreas==="desglose", porNivel=S.agrupar==="nivel";
+
+  // rentable / común
+  const ren=fs.filter(f=>claseDe(f.nombre)==="rentable").reduce((s,f)=>s+f.gfa,0);
+  const com=fs.filter(f=>claseDe(f.nombre)==="comun").reduce((s,f)=>s+f.gfa,0);
+  $("t-ren").textContent=fmt(ren); $("t-com").textContent=fmt(com);
+  $("t-efi").textContent = (ren+com)>0 ? `${fmt(100*ren/(ren+com),1)} %` : "–";
+  // valores en la portada
+  const V=valores();
+  const hayCosto = fs.some(f=>isFinite(costoDe(f)));
+  $("t-val").textContent = hayCosto ? moneda(V.total) : "–";
+  $("t-val-ren").textContent = hayCosto ? moneda(V.priv) : "–";
+  $("t-val-com").textContent = hayCosto ? moneda(V.com) : "–";
+  $("nota-valor").textContent = !hayCosto ? "Captura el costo por m² de cada función en la pestaña Valores para obtener el valor bruto."
+    : (V.sinCosto.length ? `Valores parciales: faltan costos para ${V.sinCosto.join(", ")}.` : "");
+  $("nota-nivel").hidden=!porNivel;
+  $("h-func").textContent = porNivel ? "Por nivel y función" : "Por función";
+
+  // registro de grupos de volúmenes para los botones de visibilidad
+  S.gruposVis=[];
+  const ojo = paths => { const id=S.gruposVis.push([...paths])-1; return `<td class="ojo-c">${botonOjo(id)}${botonTransp(id)}</td>`; };
+
+  const info = f => fs.find(x=>x.id===f) || S.funciones.map(x=>({id:x.id,nombre:x.name,color:x.color})).find(x=>x.id===f) || {id:f,nombre:f,color:"transparent"};
+  function porFuncion(edifs){
+    const m=new Map();
+    const tomar=id=>{ if(!m.has(id)) m.set(id,{gfa:0,uni:0,paths:new Set()}); return m.get(id); };
+    for(const e of edifs){
+      for(const f of e.funciones||[]){ const r=tomar(f.id); r.gfa+=f.gfa; r.paths.add(e.path); }
+      for(const [k,n] of Object.entries(e.unidadesFn||{})){ const r=tomar(idFuncion(k)); r.uni+=n; r.paths.add(e.path); }
+    }
+    return [...m.entries()].map(([id,r])=>({ ...info(id), gfa:r.gfa, uni:r.uni, paths:r.paths, clase:claseDe(info(id).nombre) })).sort((a,b)=>b.gfa-a.gfa);
+  }
+  const union = l => { const u=new Set(); l.forEach(f=>f.paths.forEach(p=>u.add(p))); return u; };
+  const fila = (f, sangria) => `<tr>${ojo(f.paths)}<td${sangria?' style="padding-left:16px"':''}><span class="muestra" style="background:${esc(f.color)}"></span>${esc(f.nombre)}</td><td class="n">${f.gfa?fmt(f.gfa):"–"}</td><td class="n">${f.gfa?fmt(100*f.gfa/gfa,1):"–"}</td><td class="n">${f.uni?fmt(f.uni):"–"}</td></tr>`;
+  const sub = (txt, l, fuerte) => { const g=suma(l,"gfa"), u=suma(l,"uni");
+    return `<tr class="${fuerte?"sub-fuerte":"sub"}">${ojo(union(l))}<td>${txt}</td><td class="n">${fmt(g)}</td><td class="n">${fmt(100*g/gfa,1)}</td><td class="n">${u?fmt(u):"–"}</td></tr>`; };
+  const cab = (txt, paths) => `<tr class="cab">${paths?ojo(paths):'<td></td>'}<td colspan="4">${txt}</td></tr>`;
+  const suma = (l,k) => l.reduce((s,f)=>s+(f[k]||0),0);
+
+  let html="";
+  if(!porNivel){
+    const todas=porFuncion(inc0);
+    if(!desg) html=todas.map(f=>fila(f,false)).join("");
+    else for(const [clase,nom] of [["rentable","Área privativa"],["comun","Áreas comunes"]]){
+      const l=todas.filter(f=>f.clase===clase); if(!l.length) continue;
+      html += cab(nom, union(l)) + l.map(f=>fila(f,true)).join("") + sub(`Subtotal ${nom.toLowerCase()}`, l);
+    }
+  } else {
+    const nivs=[...new Set(inc0.map(e=>e.nivel ?? "?"))].sort((a,b)=>(a==="?")-(b==="?") || a-b);
+    for(const n of nivs){
+      const edifs=inc0.filter(e=>(e.nivel ?? "?")===n);
+      const l=porFuncion(edifs);
+      const cota = n==="?" ? null : S.cotasNivel[n-1]-S.cotasNivel[0];
+      html += cab(n==="?" ? "Sin altura" : `Nivel ${n} · desplante ${cota>=0?"+":""}${fmt(cota,2)} m · ${edifs.length} volumen(es)`, edifs.map(e=>e.path));
+      if(desg){
+        for(const [clase,nom] of [["rentable","Privativa"],["comun","Común"]]){
+          const lc=l.filter(f=>f.clase===clase); if(!lc.length) continue;
+          html += lc.map(f=>fila(f,true)).join("") + sub(`${nom} N${n}`, lc);
+        }
+      } else html += l.map(f=>fila(f,true)).join("");
+      html += sub(n==="?" ? "Subtotal sin altura" : `Subtotal nivel ${n}`, l, true);
+    }
+  }
+  $("tb-func").innerHTML = html || '<tr><td colspan="5" class="vacio">Sin funciones asignadas.</td></tr>';
+  const todas=porFuncion(inc0);
+  $("tf-func").innerHTML = todas.length ? `<tr>${ojo(inc0.map(e=>e.path))}<td>Total</td><td class="n">${fmt(gfa)}</td><td class="n">100</td><td class="n">${fmt(suma(todas,"uni"))}</td></tr>` : "";
+
+  // nota de unidades
+  const uForma=val(S.totales?.unitStatistics?.count);
+  const cuenta=k=>inc0.filter(e=>e.fuenteUnid===k).length;
+  const uModelo=inc0.filter(e=>e.fuenteUnid==="subdivision"||e.fuenteUnid==="prorrateo").reduce((s,e)=>s+unidadesEdif(e),0);
+  const partes=[];
+  if(cuenta("subdivision")) partes.push(`${cuenta("subdivision")} volumen(es) subdividido(s): cada subdivisión cuenta como una unidad (las plantas completas sin dividir de una misma función cuentan como una sola).`);
+  if(cuenta("volumen")) partes.push(`${cuenta("volumen")} volumen(es) sin subdividir cuentan como 1 unidad por función.`);
+  if(cuenta("prorrateo")) partes.push(`${cuenta("prorrateo")} edificio(s) con unidades repartidas en proporción al GFA de cada función.`);
+  if(isFinite(uForma) && uForma>0 && Math.round(uModelo)!==Math.round(uForma)) partes.push(`Ojo: Forma reporta ${fmt(uForma)} unidades modeladas y el desglose de esos edificios suma ${fmt(uModelo)}.`);
+  if(desg) partes.push("La clasificación privativa / común se ajusta en la pestaña Edificios.");
+  $("nota-unid").textContent = partes.join(" ");
+
+  // por edificio, ordenados por nivel
+  $("th-edif").innerHTML = desg
+    ? '<tr><th class="ojo-c"></th><th>Edificio</th><th class="n">Nivel</th><th>Uso principal</th><th class="n">Privativa</th><th class="n">Común</th><th class="n">Unid.</th></tr>'
+    : '<tr><th class="ojo-c"></th><th>Edificio</th><th class="n">Nivel</th><th>Uso principal</th><th class="n">GFA m²</th><th class="n">Desplante</th><th class="n">Unid.</th></tr>';
+  const filas=inc0.slice().sort((a,b)=>(a.nivel??99)-(b.nivel??99) || a.nombre.localeCompare(b.nombre,"es",{numeric:true}));
+  $("tb-edif").innerHTML = filas.length ? filas.map(e=>{
+    const p=(e.funciones||[]).slice().sort((a,b)=>b.gfa-a.gfa)[0];
+    const c1 = desg ? fmt(gfaClase(e,"rentable")) : fmt(e.gfa);
+    const c2 = desg ? fmt(gfaClase(e,"comun")) : fmt(e.des);
+    return `<tr>${ojo([e.path])}<td title="${esc(e.path)}">${esc(e.nombre)}</td><td class="n">${e.nivel?`N${e.nivel}`:"–"}</td>
+      <td>${p?`<span class="muestra" style="background:${esc(p.color)}"></span>${esc(p.nombre)}`:'<span class="vacio">–</span>'}</td>
+      <td class="n">${c1}</td><td class="n">${c2}</td><td class="n">${fmt(unidadesEdif(e))}</td></tr>`;
+  }).join("") : '<tr><td colspan="7" class="vacio">Sin edificios incluidos.</td></tr>';
+  enlazarOjos();
+  $("btn-mostrar-todo").hidden = !S.ocultos.size && !S.transp.size;
+}
+
+/* ---------- visibilidad en la escena ---------- */
+S.ocultos = new Set();
+const SVG_OJO = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>';
+const SVG_OJO_NO = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 3l18 18" stroke="currentColor" stroke-width="1.8"/></svg>';
+function estadoGrupo(paths){
+  const h=paths.filter(p=>S.ocultos.has(p)).length;
+  return h===0 ? "visible" : (h===paths.length ? "oculto" : "parcial");
+}
+function botonOjo(id){
+  const st=estadoGrupo(S.gruposVis[id]);
+  const etq = st==="oculto" ? "Mostrar en la escena" : "Ocultar en la escena";
+  return `<button class="ojo ${st}" data-vis="${id}" title="${etq}" aria-label="${etq}" aria-pressed="${st!=="visible"}">${st==="oculto"?SVG_OJO_NO:SVG_OJO}</button>`;
+}
+function enlazarOjos(){
+  document.querySelectorAll("button.ojo[data-vis]").forEach(b=>b.addEventListener("click",()=>alternarVisibilidad(S.gruposVis[+b.dataset.vis])));
+  document.querySelectorAll("button.ojo[data-tr]").forEach(b=>b.addEventListener("click",()=>alternarTransparencia(S.gruposVis[+b.dataset.tr])));
+}
+async function alternarVisibilidad(paths){
+  if(!paths?.length) return;
+  const mostrar = estadoGrupo(paths)==="oculto";       // todo oculto → mostrar; visible o parcial → ocultar
+  try{
+    await quitarTransparente(paths, false);
+    await Forma.render.setElementsVisibility({ paths: paths.map(path=>({ path, visible:mostrar })) });
+    paths.forEach(p=> mostrar ? S.ocultos.delete(p) : S.ocultos.add(p));
+  }catch(err){ console.error(err); estado(`No se pudo cambiar la visibilidad: ${err?.message??err}`, true); }
+  pintarAreas();
+}
+async function mostrarTodo(){
+  for(const id of S.transp.values()){ try{ await Forma.render.remove({ id }); }catch(_){} }
+  S.transp.clear();
+  try{ await Forma.render.unhideAllElements(); }catch(err){ console.error(err); }
+  S.ocultos.clear(); pintarAreas();
+}
+/* ---------- transparencia: el volumen real se oculta y se dibuja una copia translúcida ---------- */
+S.transp = new Map();      // path → id de la malla translúcida
+S.geoCache = new Map();    // path → { position, normal }
+const opacidad = () => Math.min(90, Math.max(5, parseFloat(cargarG("opacidad", 30)) || 30));
+const SVG_TR = '<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>';
+function hexRGB(h){ const m=/^#?([0-9a-f]{6})$/i.exec(String(h||"")); const n=m?parseInt(m[1],16):0x989F9C; return [(n>>16)&255,(n>>8)&255,n&255]; }
+async function geometriaMalla(path){
+  if(S.geoCache.has(path)) return S.geoCache.get(path);
+  const pos=await Forma.geometry.getTriangles({ path });
+  const nor=new Float32Array(pos.length);
+  for(let i=0;i<pos.length;i+=9){       // normal plana por triángulo
+    const ax=pos[i+3]-pos[i], ay=pos[i+4]-pos[i+1], az=pos[i+5]-pos[i+2];
+    const bx=pos[i+6]-pos[i], by=pos[i+7]-pos[i+1], bz=pos[i+8]-pos[i+2];
+    let nx=ay*bz-az*by, ny=az*bx-ax*bz, nz=ax*by-ay*bx; const L=Math.hypot(nx,ny,nz)||1; nx/=L; ny/=L; nz/=L;
+    for(let k=0;k<9;k+=3){ nor[i+k]=nx; nor[i+k+1]=ny; nor[i+k+2]=nz; }
+  }
+  const g={ position:pos, normal:nor }; S.geoCache.set(path,g); return g;
+}
+function colorDe(path){
+  const e=S.edificios.find(x=>x.path===path);
+  const p=(e?.funciones||[]).slice().sort((a,b)=>b.gfa-a.gfa)[0];
+  return hexRGB(p?.color);
+}
+function datosMalla(g, rgb){
+  const n=g.position.length/3, col=new Uint8Array(n*4), a=Math.round(255*opacidad()/100);
+  for(let i=0;i<n;i++){ col[i*4]=rgb[0]; col[i*4+1]=rgb[1]; col[i*4+2]=rgb[2]; col[i*4+3]=a; }
+  return { position:g.position, normal:g.normal, color:col };
+}
+async function ponerTransparente(paths){
+  const nuevos=paths.filter(p=>!S.transp.has(p));
+  if(!nuevos.length) return;
+  await Forma.render.setElementsVisibility({ paths: nuevos.map(path=>({ path, visible:false })) });
+  for(const path of nuevos){
+    S.ocultos.delete(path);
+    try{
+      const g=await geometriaMalla(path);
+      const { id } = await Forma.render.addMesh({ geometryData: datosMalla(g, colorDe(path)) });
+      S.transp.set(path, id);
+    }catch(err){ console.error(err); }
+  }
+}
+async function quitarTransparente(paths, mostrarReal){
+  const lst=paths.filter(p=>S.transp.has(p));
+  for(const p of lst){ try{ await Forma.render.remove({ id:S.transp.get(p) }); }catch(_){} S.transp.delete(p); }
+  if(mostrarReal && lst.length) await Forma.render.setElementsVisibility({ paths: lst.map(path=>({ path, visible:true })) });
+}
+function estadoTransp(paths){
+  const t=paths.filter(p=>S.transp.has(p)).length;
+  return t===0 ? "no" : (t===paths.length ? "si" : "parcial");
+}
+function botonTransp(id){
+  const st=estadoTransp(S.gruposVis[id]);
+  const etq = st==="si" ? "Quitar transparencia" : "Hacer transparente";
+  return `<button class="ojo tr ${st}" data-tr="${id}" title="${etq}" aria-label="${etq}" aria-pressed="${st!=="no"}">${SVG_TR}</button>`;
+}
+async function alternarTransparencia(paths){
+  if(!paths?.length) return;
+  try{
+    if(estadoTransp(paths)==="si") await quitarTransparente(paths, true);
+    else await ponerTransparente(paths);
+  }catch(err){ console.error(err); estado(`No se pudo aplicar la transparencia: ${err?.message??err}`, true); }
+  pintarAreas();
+}
+async function refrescarOpacidad(){
+  for(const [path,id] of S.transp){
+    try{ await Forma.render.updateMesh({ id, geometryData: datosMalla(await geometriaMalla(path), colorDe(path)) }); }catch(err){ console.error(err); }
+  }
+}
+
+
+
+/* ---------- clasificación rentable / común (pestaña Edificios) ---------- */
+function pintarClasif(){
+  const fs=funcionesTotales();
+  const lista=[...fs.map(f=>({nombre:f.nombre,color:f.color,gfa:f.gfa})),
+    ...S.funciones.filter(x=>!fs.some(f=>f.id===x.id)).map(x=>({nombre:x.name,color:x.color,gfa:0}))];
+  $("tb-clasif").innerHTML = lista.length ? lista.map(f=>{
+    const c=claseDe(f.nombre), auto=!(f.nombre.toLowerCase() in S.clasif);
+    return `<tr><td><span class="muestra" style="background:${esc(f.color)}"></span>${esc(f.nombre)}${auto?' <span class="etq">auto</span>':""}</td>
+      <td class="n">${f.gfa?fmt(f.gfa):'<span class="vacio">sin área</span>'}</td>
+      <td><div class="segm mini" role="group" aria-label="Tipo de área para ${esc(f.nombre)}">
+        <button data-fn="${esc(f.nombre)}" data-clase="rentable" aria-pressed="${c==="rentable"}">Privativa</button>
+        <button data-fn="${esc(f.nombre)}" data-clase="comun" aria-pressed="${c==="comun"}">Común</button>
+      </div></td></tr>`;
+  }).join("") : '<tr><td colspan="3" class="vacio">Sin funciones.</td></tr>';
+  $("tb-clasif").querySelectorAll("button[data-clase]").forEach(b=>b.addEventListener("click",()=>{
+    S.clasif[b.dataset.fn.toLowerCase()]=b.dataset.clase; guardarG("clasif-funciones",S.clasif);
+    pintarTodo(); if(S.vista==="clase") colorearVista();
+  }));
+}
+
+// interruptores de la pestaña Áreas (se recuerdan entre sesiones)
+S.agrupar = cargarG("vista-agrupar","completo");
+S.modoAreas = cargarG("vista-areas","totales");
+function marcarInterruptores(){
+  document.querySelectorAll("[data-agrupar]").forEach(x=>x.setAttribute("aria-pressed", x.dataset.agrupar===S.agrupar));
+  document.querySelectorAll("[data-areas]").forEach(x=>x.setAttribute("aria-pressed", x.dataset.areas===S.modoAreas));
+}
+document.querySelectorAll("[data-agrupar]").forEach(b=>b.addEventListener("click",()=>{ S.agrupar=b.dataset.agrupar; guardarG("vista-agrupar",S.agrupar); marcarInterruptores(); pintarAreas(); }));
+document.querySelectorAll("[data-areas]").forEach(b=>b.addEventListener("click",()=>{ S.modoAreas=b.dataset.areas; guardarG("vista-areas",S.modoAreas); marcarInterruptores(); pintarAreas(); }));
+marcarInterruptores();
+$("btn-mostrar-todo").addEventListener("click", mostrarTodo);
+$("opacidad").value=opacidad(); $("opacidad-v").textContent=`${opacidad()} %`;
+$("opacidad").addEventListener("input",e=>{ $("opacidad-v").textContent=`${e.target.value} %`; });
+$("opacidad").addEventListener("change",e=>{ guardarG("opacidad", parseFloat(e.target.value)); refrescarOpacidad(); });
+$("tol-nivel").value=tolNivel();
+$("tol-nivel").addEventListener("change",e=>{
+  const v=parseFloat(e.target.value); if(!(v>0)) return;
+  guardarG("tol-nivel",v); asignarNiveles(incluidos()); pintarAreas(); if(S.vista==="nivel") colorearVista();
+});
+
+// vistas en escena: por nivel o por tipo de área
+S.vista=null;
+const PAL_NIVEL=["#636B69","#B9BEBC","#3F4543","#989F9C","#1E2221","#D5D8D7"];
+async function colorearVista(){
+  try{ await Forma.render.elementColors.clearAll(); }catch(_){}
+  if(!S.vista) return;
+  const m=new Map();
+  for(const e of incluidos()){
+    if(S.vista==="nivel") m.set(e.path, e.nivel ? PAL_NIVEL[(e.nivel-1)%PAL_NIVEL.length] : "#E8B4B4");
+    else { const r=gfaClase(e,"rentable"), c=gfaClase(e,"comun"); m.set(e.path, r>=c ? "#636B69" : "#D5D8D7"); }
+  }
+  try{ await Forma.render.elementColors.set({ pathsToColor:m }); }catch(err){ console.error(err); }
+}
+function botonesVista(){
+  $("btn-vista-nivel").textContent = S.vista==="nivel" ? "Quitar colores de niveles" : "Ver niveles en escena";
+  $("btn-vista-clase").textContent = S.vista==="clase" ? "Quitar colores privativa / común" : "Ver privativa / común en escena";
+}
+$("btn-vista-nivel").addEventListener("click",()=>{ S.vista = S.vista==="nivel"?null:"nivel"; S.verEscena=false; botonesVista(); colorearVista(); });
+$("btn-vista-clase").addEventListener("click",()=>{ S.vista = S.vista==="clase"?null:"clase"; S.verEscena=false; botonesVista(); colorearVista(); });
+
+$("btn-tsv").addEventListener("click", async ()=>{
+  const ux=unidadesPorFuncion();
+  const L=["Función\tTipo\tGFA m²\tUnidades\tCosto $/m²\tValor $"];
+  funcionesTotales().forEach(f=>{ const c=costoDe(f);
+    L.push(`${f.nombre}\t${claseDe(f.nombre)==="comun"?"Común":"Privativa"}\t${f.gfa.toFixed(2)}\t${ux[f.id]?ux[f.id].toFixed(0):""}\t${isFinite(c)?c:""}\t${isFinite(c)?(f.gfa*c).toFixed(2):""}`); });
+  { const V=valores(); L.push(`Valor bruto\t\t\t\t\t${V.total.toFixed(2)}`, `Valor privativo\t\t\t\t\t${V.priv.toFixed(2)}`, `Valor áreas comunes\t\t\t\t\t${V.com.toFixed(2)}`); }
+  L.push("","Edificio\tNivel\tGFA m²\tPrivativa m²\tComún m²\tDesplante m²\tUnidades");
+  incluidos().slice().sort((a,b)=>(a.nivel??99)-(b.nivel??99)).forEach(e=>L.push(`${e.nombre}\t${e.nivel?`N${e.nivel}`:""}\t${isFinite(e.gfa)?e.gfa.toFixed(2):""}\t${gfaClase(e,"rentable").toFixed(2)}\t${gfaClase(e,"comun").toFixed(2)}\t${isFinite(e.des)?e.des.toFixed(2):""}\t${unidadesEdif(e)}`));
+  await copiar(L.join("\n"), "Tablas copiadas. Pégalas en Excel.");
+});
+
+/* ---------- estacionamiento ---------- */
+const metricasForma = () => S.totales?.customMetrics || [];
+const metricaDemanda = () => S.demFuente ? metricasForma().find(m=>m.id===S.demFuente) : null;
+const pareceEstac = m => /parking|aparcamiento|estacionamiento|cajon|cajón|plaza/i.test(m.name||"");
+
+function requeridoForma(f, ux){
+  const m=metricaDemanda();
+  if(m){ const b=(m.functionBreakdown||[]).find(x=>x.functionId===f.id); return b ? num(b.value) : NaN; }
+  const d=S.demanda[f.id]; if(!d || !(d.valor>0)) return NaN;
+  return d.modo==="unidad" ? (ux[f.id]||0)*d.valor : f.gfa/d.valor;
+}
+
+function requeridoNorma(f, ux){
+  const usoId=S.mapeo[f.id]; const u=S.norma?.usos?.find(x=>x.id===usoId);
+  if(!u || !(u.valor>0)) return NaN;
+  if(u.base==="unidad"){
+    // para usos por unidad, las unidades salen del mismo reparto que la demanda Forma
+    return (ux[f.id]||0)*u.valor;
+  }
+  const factor = (u.base==="m2_util" || u.base==="m2_vendible") ? (u.factor_util ?? 1) : 1;
+  return (f.gfa*factor)/u.valor;
+}
+
+function pintarEstac(){
+  const fs=funcionesTotales(); const ux=unidadesPorFuncion();
+  // fuente de la demanda: métrica de Forma (si la expone) o captura manual
+  const ms=metricasForma();
+  if(S.demFuente && !ms.some(m=>m.id===S.demFuente) && S.totales) { S.demFuente=""; guardar("dem-fuente",""); }
+  if(!S.demFuente && !cargar("dem-fuente-elegida",false)){
+    const auto=ms.find(pareceEstac); if(auto){ S.demFuente=auto.id; }
+  }
+  $("dem-fuente").innerHTML = `<option value="">Captura manual</option>` + ms.map(m=>`<option value="${esc(m.id)}" ${S.demFuente===m.id?"selected":""}>Métrica de Forma: ${esc(m.name)}</option>`).join("");
+  const mD=metricaDemanda();
+  $("dem-nota").textContent = mD
+    ? `Se usa la métrica "${mD.name}" calculada por Forma, desglosada por función. No hay nada que capturar.`
+    : (ms.length ? "Forma envía métricas adicionales; si alguna es la demanda de aparcamiento, elígela arriba. Si no, captura los valores por función."
+                 : "Forma no envía la demanda de aparcamiento por el SDK. Captura los mismos valores que tienes configurados en Forma; se guardan por proyecto.");
+  if(mD){
+    $("tb-dem").innerHTML = fs.length ? fs.map(f=>`<tr><td><span class="muestra" style="background:${esc(f.color)}"></span>${esc(f.nombre)}</td><td colspan="2" class="vacio">calculado por Forma</td><td class="n">${fmt(requeridoForma(f,ux),1)}</td></tr>`).join("")
+                                      : '<tr><td colspan="4" class="vacio">Sin funciones con área.</td></tr>';
+    const tot=val(mD);
+    $("tf-dem").innerHTML = `<tr><td colspan="3">Total requerido (Forma)</td><td class="n">${fmt(tot)}</td></tr>`;
+  } else
+  $("tb-dem").innerHTML = fs.length ? fs.map(f=>{
+    const d=S.demanda[f.id]||{modo:"m2",valor:""};
+    const r=requeridoForma(f,ux);
+    return `<tr>
+      <td><span class="muestra" style="background:${esc(f.color)}"></span>${esc(f.nombre)}</td>
+      <td><select data-f="${esc(f.id)}" data-campo="modo" aria-label="Criterio para ${esc(f.nombre)}">
+        <option value="m2" ${d.modo==="m2"?"selected":""}>m² GFA por cajón</option>
+        <option value="unidad" ${d.modo==="unidad"?"selected":""}>cajones por unidad</option>
+      </select></td>
+      <td style="width:64px"><input type="number" min="0" step="any" value="${esc(d.valor)}" data-f="${esc(f.id)}" data-campo="valor" aria-label="Valor para ${esc(f.nombre)}"></td>
+      <td class="n">${fmt(r,1)}</td></tr>`;
+  }).join("") : '<tr><td colspan="4" class="vacio">Sin funciones con área.</td></tr>';
+  const totF = mD ? val(mD) : fs.reduce((s,f)=>{const r=requeridoForma(f,ux); return isFinite(r)?s+r:s;},0);
+  const hayF = mD ? isFinite(totF) : fs.some(f=>isFinite(requeridoForma(f,ux)));
+  if(!mD) $("tf-dem").innerHTML = fs.length ? `<tr><td colspan="3">Total requerido (criterio Forma)</td><td class="n">${hayF?fmt(Math.ceil(totF)):"–"}</td></tr>` : "";
+  $("tb-dem").querySelectorAll("select,input").forEach(el=>el.addEventListener("change",()=>{
+    const id=el.dataset.f; S.demanda[id]=S.demanda[id]||{modo:"m2",valor:""};
+    S.demanda[id][el.dataset.campo] = el.dataset.campo==="valor" ? parseFloat(el.value) : el.value;
+    guardar("demanda",S.demanda); pintarEstac();
+  }));
+
+  // norma
+  const N=S.norma;
+  $("norma-info").innerHTML = N
+    ? `${esc(N.jurisdiccion||"Jurisdicción sin nombre")} · ${esc(N.fuente||"fuente no indicada")}${N.revisado_por?` · revisado por ${esc(N.revisado_por)}`:' · <span class="falta">sin revisión humana</span>'}`
+    : `Sin tabla normativa cargada. Usa "Exportar para revisión normativa" y trae de vuelta la tabla en JSON.`;
+  $("tb-norma").innerHTML = (N && fs.length) ? fs.map(f=>{
+    const r=requeridoNorma(f,ux);
+    const u=N.usos.find(x=>x.id===S.mapeo[f.id]);
+    return `<tr>
+      <td><span class="muestra" style="background:${esc(f.color)}"></span>${esc(f.nombre)}</td>
+      <td><select data-f="${esc(f.id)}" aria-label="Uso normativo para ${esc(f.nombre)}">
+        <option value="">— asignar —</option>
+        ${N.usos.map(x=>`<option value="${esc(x.id)}" ${S.mapeo[f.id]===x.id?"selected":""}>${esc(x.nombre)}</option>`).join("")}
+      </select>${u?.nota?`<div class="nota" style="margin:2px 0 0">${esc(u.nota)}</div>`:""}</td>
+      <td class="n">${fmt(r,1)}</td></tr>`;
+  }).join("") : "";
+  const totN = fs.reduce((s,f)=>{const r=requeridoNorma(f,ux); return isFinite(r)?s+r:s;},0);
+  const hayN = N && fs.some(f=>isFinite(requeridoNorma(f,ux)));
+  $("tf-norma").innerHTML = N ? `<tr><td colspan="2">Total requerido (reglamento)</td><td class="n">${hayN?fmt(Math.ceil(totN)):"–"}</td></tr>` : "";
+  $("tb-norma").querySelectorAll("select").forEach(el=>el.addEventListener("change",()=>{
+    S.mapeo[el.dataset.f]=el.value; guardar("mapeo",S.mapeo); pintarEstac();
+  }));
+
+  // estacionamientos detectados
+  const est=S.estac||[];
+  $("tb-estac").innerHTML = est.length ? est.map(r=>{
+    const area = r.areaForma>0 ? r.areaForma : r.areaHuella;
+    const estim = !isFinite(r.plazas) && r.areaHuella>0 ? Math.floor(r.areaHuella/m2PorCajon()) : NaN;
+    return `<tr><td title="${esc(r.path)}">${esc(r.nombre)}</td><td class="n">${fmt(area)}</td>
+      <td class="n">${isFinite(r.plazas)?fmt(r.plazas):(isFinite(estim)?`≈ ${fmt(estim)}`:"–")}</td>
+      <td class="nota" style="margin:0">${r.fuente?esc(r.fuente):(isFinite(estim)?"estimado por área":"sin dato")}</td></tr>`;
+  }).join("") : '<tr><td colspan="4" class="vacio">No se encontraron estacionamientos en la propuesta.</td></tr>';
+  const hayEstim = est.some(r=>!isFinite(r.plazas) && r.areaHuella>0);
+  $("lbl-m2caj").hidden=!hayEstim; $("lbl-m2caj").style.display = hayEstim ? "grid" : "none";
+  $("m2-cajon").value=m2PorCajon();
+
+  // balance
+  const provReal = num(S.totales?.parkingStatistics?.spots);
+  const provEst = plazasEstimadas();
+  const prov = (isFinite(provReal)?provReal:0) + provEst;
+  const linea = (lbl, req) => {
+    if(!isFinite(req) || !isFinite(prov)) return "";
+    const d = prov - Math.ceil(req);
+    return `<div>${lbl}: <b class="${d<0?"falta":"sobra"}">${d<0?"faltan":"sobran"} ${fmt(Math.abs(d))}</b></div>`;
+  };
+  $("balance").innerHTML = `<div>Cajones disponibles: <b>${fmt(prov)}</b>${provEst?` <span class="nota">(${fmt(provReal||0)} cuantificados por Forma + ≈${fmt(provEst)} estimados por área)</span>`:""}</div>`
+    + linea("Contra criterio Forma", hayF?totF:NaN)
+    + linea("Contra reglamento", hayN?totN:NaN);
+}
+
+/* ---------- intercambio con la revisión normativa ---------- */
+function mostrarTxt(v, aplicar){
+  $("txt").hidden=false; $("acc-txt").hidden=false; $("txt").value=v;
+  $("btn-aplicar").hidden=!aplicar;
+}
+$("btn-cerrar").addEventListener("click",()=>{ $("txt").hidden=true; $("acc-txt").hidden=true; });
+
+$("btn-export").addEventListener("click", async ()=>{
+  const ux=unidadesPorFuncion();
+  const datos = {
+    proposito: "Revisión normativa de estacionamiento — DIS / Ares Arquitectos",
+    proyecto: S.proyecto?.name, pais: S.pais,
+    ubicacion: S.geo ? {lat:S.geo[0], lon:S.geo[1]} : null,
+    predio_m2: val(S.totales?.builtInMetrics?.siteArea),
+    funciones: funcionesTotales().map(f=>({
+      id:f.id, nombre:f.nombre, gfa_m2:+f.gfa.toFixed(2),
+      unidades_asignadas: ux[f.id]!=null ? +ux[f.id].toFixed(1) : null,
+      demanda_forma: S.demanda[f.id] ?? null
+    })),
+    unidades_totales: val(S.totales?.unitStatistics?.count),
+    cajones_modelados: num(S.totales?.parkingStatistics?.spots)
+  };
+  const t=JSON.stringify(datos,null,1);
+  await copiar(t, "Datos copiados. Pégalos en el chat de Claude para la revisión normativa.");
+  mostrarTxt(t,false);
+});
+
+$("btn-cargar").addEventListener("click",()=>{ mostrarTxt("", true); $("txt").placeholder='Pega aquí el JSON de la tabla normativa ({"jurisdiccion":…, "usos":[…]})'; $("txt").focus(); });
+
+$("btn-aplicar").addEventListener("click",()=>{
+  try{
+    const n=JSON.parse($("txt").value);
+    if(!Array.isArray(n.usos) || !n.usos.every(u=>u.id && u.nombre && u.base && u.valor>0))
+      throw new Error('cada uso necesita id, nombre, base y valor mayor que 0');
+    S.norma=n; guardar("norma",n);
+    // mapeo automático por coincidencia de nombre cuando la tabla lo sugiere
+    funcionesTotales().forEach(f=>{
+      if(S.mapeo[f.id]) return;
+      const m=n.usos.find(u=>(u.funciones_forma||[]).some(x=>x.toLowerCase()===f.nombre.toLowerCase()));
+      if(m) S.mapeo[f.id]=m.id;
+    });
+    guardar("mapeo",S.mapeo);
+    $("txt").hidden=true; $("acc-txt").hidden=true;
+    pintarEstac(); estado("Tabla normativa aplicada.");
+  }catch(err){ estado(`La tabla no es válida: ${err.message}.`, true); }
+});
+
+async function copiar(t, ok){
+  try{ await navigator.clipboard.writeText(t); estado(ok); }
+  catch(_){ mostrarTxt(t,false); $("txt").select(); estado("El portapapeles está bloqueado en este panel: copia el texto con Ctrl+C."); }
+}
+
+function pintarCustom(){
+  const ms=metricasForma();
+  $("tb-custom").innerHTML = ms.length ? ms.map(m=>`<tr><td>${esc(m.name)}</td><td class="n">${fmt(val(m),1)}</td><td>${({COUNT:"conteo",SQUARE_METER:"m²"})[m.unitOfMeasurement]??""}</td></tr>`).join("")
+    : '<tr><td colspan="3" class="vacio">Forma no envió métricas adicionales para esta selección.</td></tr>';
+}
+$("m2-cajon").addEventListener("change",e=>{ guardar("m2-cajon", parseFloat(e.target.value)||25); pintarTodo(); });
+$("dem-fuente").addEventListener("change",e=>{
+  S.demFuente=e.target.value; guardar("dem-fuente",S.demFuente); guardar("dem-fuente-elegida",true); pintarEstac();
+});
+/* ---------- costos y valores ---------- */
+S.costos = cargar("costos", {});          // por proyecto: id de función → costo por m²
+const costoDe = f => { const v=S.costos[f.id]; return (typeof v==="number" && v>=0) ? v : NaN; };
+const moneda = v => isFinite(v) ? "$" + v.toLocaleString("es-MX",{maximumFractionDigits:0}) : "–";
+function valores(){
+  const fs=funcionesTotales(); const r={ total:0, priv:0, com:0, sinCosto:[] };
+  for(const f of fs){
+    const c=costoDe(f); if(!isFinite(c)){ r.sinCosto.push(f.nombre); continue; }
+    const v=f.gfa*c; r.total+=v; if(claseDe(f.nombre)==="comun") r.com+=v; else r.priv+=v;
+  }
+  return r;
+}
+function pintarCostos(){
+  const fs=funcionesTotales();
+  const fila=f=>{ const c=costoDe(f), cl=claseDe(f.nombre);
+    return `<tr><td><span class="muestra" style="background:${esc(f.color)}"></span>${esc(f.nombre)}</td>
+      <td>${cl==="comun"?"Común":"Privativa"}</td><td class="n">${fmt(f.gfa)}</td>
+      <td class="n"><input type="number" class="costo" min="0" step="100" data-fn="${esc(f.id)}" value="${isFinite(c)?c:""}" placeholder="$/m²" aria-label="Costo por m² de ${esc(f.nombre)}"></td>
+      <td class="n">${isFinite(c)?moneda(f.gfa*c):'<span class="vacio">–</span>'}</td></tr>`; };
+  const grupo=(cl,nom)=>{ const l=fs.filter(f=>(claseDe(f.nombre)==="comun"?"comun":"privativa")===cl); if(!l.length) return "";
+    const g=l.reduce((s,f)=>s+f.gfa,0), v=l.reduce((s,f)=>s+(isFinite(costoDe(f))?f.gfa*costoDe(f):0),0);
+    return l.map(fila).join("") + `<tr class="sub"><td colspan="2">Subtotal ${nom}</td><td class="n">${fmt(g)}</td><td class="n">${g&&v?moneda(v/g)+"/m²":""}</td><td class="n">${moneda(v)}</td></tr>`; };
+  $("tb-costo").innerHTML = fs.length ? grupo("privativa","privativa")+grupo("comun","áreas comunes") : '<tr><td colspan="5" class="vacio">Sin funciones con área.</td></tr>';
+  const V=valores(), G=fs.reduce((s,f)=>s+f.gfa,0);
+  $("tf-costo").innerHTML = fs.length ? `<tr><td colspan="2">Total</td><td class="n">${fmt(G)}</td><td class="n">${G&&V.total?moneda(V.total/G)+"/m²":""}</td><td class="n">${moneda(V.total)}</td></tr>` : "";
+  $("tb-costo").querySelectorAll("input.costo").forEach(inp=>inp.addEventListener("change",()=>{
+    const v=parseFloat(inp.value);
+    if(inp.value==="" || !(v>=0)) delete S.costos[inp.dataset.fn]; else S.costos[inp.dataset.fn]=v;
+    guardar("costos",S.costos); pintarTodo();
+  }));
+}
+
+function pintarTodo(){ pintarAreas(); pintarClasif(); pintarCustom(); pintarCostos(); pintarEstac(); }
+
+/* =====================================================================
+   TRAZOS DXF → límites de predio, zonas y plataformas
+   Origen: selección en la escena (DXF/DWG importado en Forma) o archivo DXF
+   ===================================================================== */
+
+const TIPOS = { ignorar:"Ignorar", edificio:"Perímetro de edificio", division:"División de edificio", limite:"Límite de predio", zona:"Zona", plataforma:"Plataforma" };
+const UNID_DXF = {0:1, 1:0.0254, 2:0.3048, 4:0.001, 5:0.01, 6:1};
+const PREVIEW_ID = "dis-dxf-preview";
+const TOL = 0.02;   // m, tolerancia para unir segmentos sueltos en un contorno
+
+const D = {
+  fuente:"escena", polis:[], insunits:null, centro:{x:0,y:0},
+  mapa: cargarG("mapa-capas", {}),
+  plantillas: cargarG("plantillas", { limite:{category:"site_limit"}, zona:{category:"zone"} }),
+  niveles:{}, terreno:{}, preview:false, ref:[0,0],
+  historial: cargar("historial-dxf", [])     // por proyecto
+};
+
+function adivinarTipo(capa){
+  const c=capa.toLowerCase().trim();
+  if(c==="ar-edif-perimetro") return "edificio";      // convención ARES
+  if(c==="ar-edif-division") return "division";
+  if(/^ar-edif/.test(c)) return "ignorar";
+  if(/curva|topo|cota/.test(c)) return "ignorar";
+  if(/lim|predio|lindero|poligonal/.test(c)) return "limite";
+  if(/plat|pad|terraza|desplante/.test(c)) return "plataforma";
+  if(/zona|zone|area|área|uso/.test(c)) return "zona";
+  return "ignorar";
+}
+const tipoDe = capa => D.mapa[capa] ?? adivinarTipo(capa);
+
+/* --- geometría --- */
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+function arco(p1,p2,b){
+  const th=4*Math.atan(b), n=Math.max(2,Math.ceil(Math.abs(th)/(Math.PI/18)));
+  const dx=p2.x-p1.x, dy=p2.y-p1.y, c=Math.hypot(dx,dy);
+  if(c===0) return [];
+  const r=c/(2*Math.sin(th/2)), h=r*Math.cos(th/2);
+  const cx=(p1.x+p2.x)/2-dy/c*h, cy=(p1.y+p2.y)/2+dx/c*h;
+  const a0=Math.atan2(p1.y-cy,p1.x-cx), R=Math.abs(r), out=[];
+  for(let k=1;k<n;k++){ const a=a0+th*k/n; out.push({x:cx+R*Math.cos(a), y:cy+R*Math.sin(a)}); }
+  return out;
+}
+function discretizar(vs, cerrado){
+  const out=[];
+  for(let i=0;i<vs.length;i++){
+    const v=vs[i]; out.push({x:v.x,y:v.y});
+    const sig = i<vs.length-1 ? vs[i+1] : (cerrado ? vs[0] : null);
+    if(sig && v.bulge) out.push(...arco(v,sig,v.bulge));
+  }
+  if(out.length>1){ const a=out[0], z=out[out.length-1]; if(Math.hypot(a.x-z.x,a.y-z.y)<1e-6) out.pop(); }
+  return out;
+}
+function areaFirmada(r){ let a=0; for(let i=0;i<r.length;i++){ const [x1,y1]=r[i],[x2,y2]=r[(i+1)%r.length]; a+=x1*y2-x2*y1; } return a/2; }
+function anillo(pts){ let r=pts.slice(); if(areaFirmada(r)<0) r.reverse(); return [...r, r[0]]; }
+
+// Une líneas sueltas de una misma capa en contornos cerrados (los CAD suelen llegar "explotados")
+function cerrarLazos(lineas){
+  const cerrados=[], abiertos=[]; const pend=lineas.map(l=>l.slice());
+  while(pend.length){
+    let cad=pend.shift(), crecio=true;
+    while(crecio && !(cad.length>3 && dist(cad[0],cad[cad.length-1])<TOL)){
+      crecio=false;
+      for(let i=0;i<pend.length;i++){
+        const l=pend[i], fin=cad[cad.length-1], ini=cad[0];
+        if(dist(fin,l[0])<TOL) cad=cad.concat(l.slice(1));
+        else if(dist(fin,l[l.length-1])<TOL) cad=cad.concat(l.slice(0,-1).reverse());
+        else if(dist(ini,l[l.length-1])<TOL) cad=l.slice(0,-1).concat(cad);
+        else if(dist(ini,l[0])<TOL) cad=l.slice(1).reverse().concat(cad);
+        else continue;
+        pend.splice(i,1); crecio=true; break;
+      }
+    }
+    if(cad.length>3 && dist(cad[0],cad[cad.length-1])<TOL) cerrados.push(cad.slice(0,-1)); else abiertos.push(cad);
+  }
+  return { cerrados, abiertos };
+}
+
+/* --- matrices 4x4 en orden de columnas (convención de Forma) --- */
+const I4=[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];
+function mul4(a,b){ const r=new Array(16).fill(0); for(let c=0;c<4;c++) for(let f=0;f<4;f++) for(let k=0;k<4;k++) r[c*4+f]+=a[k*4+f]*b[c*4+k]; return r; }
+const aplicar4=(m,[x,y,z=0])=>[m[0]*x+m[4]*y+m[8]*z+m[12], m[1]*x+m[5]*y+m[9]*z+m[13], m[2]*x+m[6]*y+m[10]*z+m[14]];
+
+/* --- origen 1: selección en la escena --- */
+async function leerSeleccion(){
+  const sel=await Forma.selection.getSelection();
+  if(!sel.length) throw new Error("no hay nada seleccionado en la escena");
+  const porCapa=new Map(); const sinHuella=[];
+  const agregar=(capa,coords)=>{ if(!porCapa.has(capa)) porCapa.set(capa,{lineas:[],polis:[]}); return porCapa.get(capa); };
+
+  S.diagSel=[];
+  for(const path of sel){
+    const { element, elements } = await Forma.elements.getByPath({ path, recursive:true });
+    let M0=I4; try{ M0=(await Forma.elements.getWorldTransform({ path })).transform || I4; }catch(_){}
+    const pila=[{ el:element, M:M0, path, nombre: element?.properties?.name || path.split("/").pop() }];
+    const visitados=[]; let hallado=false;
+    while(pila.length){
+      const { el, M, path:pth, nombre } = pila.pop();
+      visitados.push({ path:pth, nombre });
+      const d={ path:pth, nombre, categoria:el?.properties?.category ?? null,
+                reps:Object.fromEntries(Object.entries(el?.representations||{}).map(([k,v])=>[k,v?.type??typeof v])),
+                hijos:(el?.children||[]).length };
+      if(S.diagSel.length<60) S.diagSel.push(d);
+      if(el?.representations?.footprint){
+        try{
+          const fp=await Forma.elements.representations.footprint({ urn:el.urn });
+          let feats=fp?.data?.features||[];
+          if(fp?.id!=null) feats=feats.filter(f=>f.id===fp.id);
+          d.features=feats.length; d.tipos=[...new Set(feats.map(f=>f.geometry?.type))];
+          d.propsEjemplo=feats[0]?.properties ?? null;
+          for(const f of feats){
+            const capa=String(f.properties?.layer ?? f.properties?.Layer ?? f.properties?.layerName ?? f.properties?.name ?? nombre ?? "Selección");
+            const g=f.geometry; if(!g) continue;
+            const T=c=>aplicar4(M,c), grupo=agregar(capa);
+            if(g.type==="Polygon") grupo.polis.push(g.coordinates[0].map(T));
+            else if(g.type==="MultiPolygon") g.coordinates.forEach(pg=>grupo.polis.push(pg[0].map(T)));
+            else if(g.type==="LineString") grupo.lineas.push(g.coordinates.map(T));
+            else if(g.type==="MultiLineString") g.coordinates.forEach(l=>grupo.lineas.push(l.map(T)));
+            else continue;
+            hallado=true;
+          }
+        }catch(err){ d.error=String(err?.message||err); }
+      }
+      for(const ch of el?.children||[]){
+        const hijo=elements?.[ch.urn]; if(!hijo) continue;
+        pila.push({ el:hijo, M:mul4(M, ch.transform||I4), path:`${pth}/${ch.key}`, nombre: ch.name || hijo.properties?.name || nombre });
+      }
+    }
+    // Respaldo: pedirle a Forma la huella ya posicionada de cada pieza
+    if(!hallado){
+      for(const v of visitados.slice(0,300)){
+        try{
+          const fp=await Forma.geometry.getFootprint({ path:v.path });
+          if(!fp?.coordinates?.length) continue;
+          const grupo=agregar(v.nombre || "Selección");
+          if(fp.type==="Polygon") grupo.polis.push(fp.coordinates); else grupo.lineas.push(fp.coordinates);
+          hallado=true;
+        }catch(_){}
+      }
+      if(hallado) S.diagSel.push({ nota:"leído con geometry.getFootprint (respaldo)" });
+    }
+    if(!hallado) sinHuella.push(`${element?.properties?.name || path}: ${Object.keys(element?.representations||{}).join(", ")||"sin representaciones"}`);
+  }
+
+  const polis=[]; let i=0, abiertas=0;
+  for(const [capa,{lineas,polis:pg}] of porCapa){
+    const { cerrados, abiertos } = cerrarLazos(lineas);
+    abiertas+=abiertos.length;
+    for(const r of [...pg.map(r=>dist(r[0],r[r.length-1])<TOL?r.slice(0,-1):r), ...cerrados]){
+      if(r.length<3) continue;
+      const zs=r.map(p=>p[2]).filter(z=>isFinite(z)&&z!==0);
+      polis.push({ id:`s${i++}`, capa, cerrado:true, local:r.map(p=>[p[0],p[1]]),
+                   elev: zs.length ? zs.reduce((s,z)=>s+z,0)/zs.length : null });
+    }
+    abiertos.forEach(r=>polis.push({ id:`s${i++}`, capa, cerrado:false, local:r.map(p=>[p[0],p[1]]), elev:null }));
+  }
+  return { polis, sinHuella, abiertas };
+}
+
+/* --- origen 2: archivo DXF --- */
+function leerDxf(texto){
+  const dxf = new DxfParser().parseSync(texto);
+  D.insunits = dxf?.header?.["$INSUNITS"] ?? null;
+  const polis=[]; let i=0;
+  for(const e of dxf?.entities || []){
+    if(e.type==="LINE"){
+      const vs=(e.vertices||[]).filter(v=>isFinite(v.x)&&isFinite(v.y));
+      if(vs.length===2) polis.push({ id:`p${i++}`, capa:String(e.layer ?? "0"), cerrado:false, pts:vs.map(v=>({x:v.x,y:v.y})), elevDxf:null });
+      continue;
+    }
+    if(e.type!=="LWPOLYLINE" && e.type!=="POLYLINE") continue;
+    if(e.is3dPolygonMesh || e.isPolyfaceMesh || e.inPaperSpace) continue;
+    const vs=(e.vertices||[]).filter(v=>isFinite(v.x)&&isFinite(v.y));
+    if(vs.length<2) continue;
+    const a=vs[0], z=vs[vs.length-1];
+    const cerrado = !!e.shape || (vs.length>3 && Math.hypot(a.x-z.x,a.y-z.y)<1e-6);
+    const zs=vs.map(v=>v.z).filter(v=>isFinite(v)&&v!==0);
+    const elev = (isFinite(e.elevation) && e.elevation!==0) ? e.elevation : (zs.length ? zs.reduce((s,v)=>s+v,0)/zs.length : null);
+    const pts=discretizar(vs, cerrado);
+    polis.push({ id:`p${i++}`, capa:String(e.layer ?? "0"), cerrado: cerrado && pts.length>=3, pts, elevDxf:elev });
+  }
+  return polis;
+}
+const factor = () => { const u=$("dxf-unid").value; return u==="auto" ? (UNID_DXF[D.insunits] ?? 1) : parseFloat(u); };
+function aLocal(p){
+  const f=factor();
+  if($("dxf-modo").value==="proyecto") return [p.x*f - D.ref[0], p.y*f - D.ref[1]];
+  const t=(parseFloat($("dxf-rot").value)||0)*Math.PI/180, c=Math.cos(t), s=Math.sin(t);
+  const x=(p.x-D.centro.x)*f, y=(p.y-D.centro.y)*f;
+  return [x*c-y*s + (parseFloat($("dxf-dx").value)||0), x*s+y*c + (parseFloat($("dxf-dy").value)||0)];
+}
+
+/* --- acceso común a ambos orígenes --- */
+const ringLocal = p => p.local ? p.local : p.pts.map(aLocal);
+const elevDe = p => p.local ? p.elev : (p.elevDxf!=null ? p.elevDxf*factor() : null);
+const activos = () => D.polis.filter(p=>tipoDe(p.capa)!=="ignorar");
+const nivelDe = p => D.niveles[p.id] ?? elevDe(p) ?? D.terreno[p.id]?.prom;
+
+function cargarPolis(polis, info){
+  D.polis=polis; D.niveles={}; D.terreno={};
+  $("dxf-info").textContent=info;
+  $("dxf-cuerpo").hidden=!polis.length; $("dxf-res").innerHTML="";
+  $("bloque-ubic").hidden = D.fuente!=="archivo";
+  pintarDxf(); muestrearTerreno(); refrescarPreview();
+}
+
+function elegirFuente(f){
+  D.fuente=f;
+  $("src-escena").classList.toggle("sec", f!=="escena"); $("src-escena").setAttribute("aria-pressed", f==="escena");
+  $("src-archivo").classList.toggle("sec", f!=="archivo"); $("src-archivo").setAttribute("aria-pressed", f==="archivo");
+  $("bloque-escena").hidden = f!=="escena"; $("bloque-archivo").hidden = f!=="archivo";
+  D.polis=[]; $("dxf-cuerpo").hidden=true; $("dxf-info").textContent="";
+}
+$("src-escena").addEventListener("click",()=>elegirFuente("escena"));
+$("src-archivo").addEventListener("click",()=>elegirFuente("archivo"));
+
+$("btn-leer-sel").addEventListener("click", async ()=>{
+  estado("Leyendo la selección…");
+  try{
+    const { polis, sinHuella, abiertas } = await leerSeleccion();
+    const cerr=polis.filter(p=>p.cerrado).length;
+    let info=`${cerr} contorno(s) cerrado(s) en ${new Set(polis.map(p=>p.capa)).size} capa(s).`;
+    if(abiertas) info+=` ${abiertas} trazo(s) abierto(s) que no cierran: se ignoran.`;
+    cargarPolis(polis, info);
+    if(sinHuella.length){
+      $("dxf-res").innerHTML = `<div class="aviso">Sin trazos 2D legibles en: ${esc(sinHuella.join(" · "))}. Usa "Copiar diagnóstico" en la pestaña Edificios y pégalo en el chat para adaptar la lectura.</div>`;
+    }
+    estado(cerr ? "Selección leída." : "La selección no tiene contornos cerrados.", !cerr);
+  }catch(err){ console.error(err); estado(`No se pudo leer la selección: ${err.message}.`, true); }
+});
+
+$("dxf-file").addEventListener("change", async ev=>{
+  const f=ev.target.files?.[0]; if(!f) return;
+  try{
+    const polis=leerDxf(await f.text());
+    if(!polis.length) throw new Error("no se encontraron polilíneas en espacio modelo");
+    const xs=polis.flatMap(p=>p.pts.map(q=>q.x)), ys=polis.flatMap(p=>p.pts.map(q=>q.y));
+    D.centro={ x:(Math.min(...xs)+Math.max(...xs))/2, y:(Math.min(...ys)+Math.max(...ys))/2 };
+    D.ref = S.proyecto?.refPoint || (await Forma.project.get()).refPoint || [0,0];
+    $("dxf-modo").value="proyecto";
+    const [cx,cy]=aLocal(D.centro);
+    if(Math.hypot(cx,cy) > 5000) $("dxf-modo").value="local";
+    $("dxf-manual").hidden = $("dxf-modo").value!=="local";
+    let unidTxt = ({1:"pulgadas",2:"pies",4:"mm",5:"cm",6:"m"})[D.insunits] ?? "sin unidades (se asume m)";
+    // El encabezado de unidades a veces miente (planos exportados): si el tamaño resultante es inverosímil, se usan metros
+    const tam=Math.max(Math.max(...xs)-Math.min(...xs), Math.max(...ys)-Math.min(...ys));
+    $("dxf-unid").value="auto";
+    if(tam*factor()<5 && tam>=5 && tam<20000){
+      $("dxf-unid").value="1";
+      unidTxt=`metros (el archivo dice ${unidTxt}, pero así el dibujo mediría ${fmt(tam*UNID_DXF[D.insunits],2)} m)`;
+      if($("dxf-modo").value==="proyecto"){ const [cx2,cy2]=aLocal(D.centro); if(Math.hypot(cx2,cy2)>5000) $("dxf-modo").value="local"; }
+      $("dxf-manual").hidden = $("dxf-modo").value!=="local";
+    }
+    cargarPolis(polis, `${f.name}: ${polis.length} trazo(s), unidades ${unidTxt}.`);
+  }catch(err){
+    console.error(err); $("dxf-cuerpo").hidden=true;
+    estado(`No se pudo leer el DXF: ${err.message}. Si es binario o DWG, expórtalo como DXF ASCII.`, true);
+  }
+});
+
+/* --- pintado --- */
+function pintarDxf(){
+  const capas=new Map();
+  D.polis.forEach(p=>{ const c=capas.get(p.capa)||{cerr:0,abie:0}; p.cerrado?c.cerr++:c.abie++; capas.set(p.capa,c); });
+  $("tb-capas").innerHTML=[...capas.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(([capa,c])=>`
+    <tr><td>${esc(capa)}</td>
+    <td class="n">${c.cerr}${c.abie?` <span class="vacio" title="Trazos abiertos: se ignoran">+${c.abie} abiertos</span>`:""}</td>
+    <td><select data-capa="${esc(capa)}" aria-label="Tipo para la capa ${esc(capa)}">
+      ${Object.entries(TIPOS).map(([k,v])=>`<option value="${k}" ${tipoDe(capa)===k?"selected":""}>${v}</option>`).join("")}
+    </select></td></tr>`).join("");
+  $("tb-capas").querySelectorAll("select").forEach(s=>s.addEventListener("change",()=>{
+    D.mapa[s.dataset.capa]=s.value; guardarG("mapa-capas",D.mapa); pintarDxf(); muestrearTerreno(); refrescarPreview();
+  }));
+
+  const act=activos().filter(p=>p.cerrado);
+  if(D.fuente==="archivo"){
+    if(act.length){
+      const pts=act.flatMap(ringLocal);
+      const cx=pts.reduce((s,p)=>s+p[0],0)/pts.length, cy=pts.reduce((s,p)=>s+p[1],0)/pts.length, d=Math.hypot(cx,cy);
+      $("dxf-ubic").innerHTML = d>2000
+        ? `<div class="aviso">El dibujo queda a ${fmt(d/1000,1)} km del origen del proyecto. Si el DXF no está en el mismo UTM que Forma, cambia a coordenadas locales y colócalo manualmente.</div>`
+        : `<p class="nota">Centro del dibujo a ${fmt(d)} m del origen del proyecto. Verifica con la previsualización antes de aplicar.</p>`;
+    } else $("dxf-ubic").innerHTML='<p class="nota">Asigna al menos una capa con polígonos cerrados.</p>';
+  }
+
+  const pads=act.filter(p=>tipoDe(p.capa)==="plataforma");
+  $("bloque-pads").hidden=!pads.length;
+  $("tb-pads").innerHTML=pads.map((p,i)=>{
+    const area=Math.abs(areaFirmada(ringLocal(p))), t=D.terreno[p.id], nivel=nivelDe(p);
+    const tt = t ? `${fmt(t.min,1)} – ${fmt(t.max,1)}` : '<span class="vacio">…</span>';
+    return `<tr><td>${esc(p.capa)} ${i+1}</td><td class="n">${fmt(area)}</td><td class="n">${tt}</td>
+      <td style="width:78px"><input type="number" step="0.1" data-pad="${p.id}" value="${isFinite(nivel)?nivel.toFixed(2):""}" aria-label="Nivel de la plataforma ${i+1}"></td></tr>`;
+  }).join("");
+  $("tb-pads").querySelectorAll("input").forEach(inp=>inp.addEventListener("change",()=>{ D.niveles[inp.dataset.pad]=parseFloat(inp.value); pintarDxf(); }));
+  const lejos=pads.some(p=>{ const t=D.terreno[p.id], n=nivelDe(p); return t && isFinite(n) && Math.abs(n-t.prom)>10; });
+  $("pad-aviso").innerHTML = lejos ? '<div class="aviso">Hay plataformas con más de 10 m de diferencia contra el terreno de Forma. Puede ser un datum distinto entre el levantamiento y el terreno: revisa antes de aplicar.</div>' : "";
+  calcularEdificios(); pintarEdificios();
+  $("pl-info").innerHTML = `Límite: <code>${esc(JSON.stringify(D.plantillas.limite))}</code><br>Zona: <code>${esc(JSON.stringify(D.plantillas.zona))}</code>`;
+}
+
+/* =====================================================================
+   EDIFICIOS DESDE DXF: AR-EDIF-PERIMETRO (contorno) + AR-EDIF-DIVISION (subdivisión)
+   ===================================================================== */
+/* ---------- subdivisión de un perímetro con líneas de división (grafo plano) ---------- */
+// ring: [[x,y],...] sin cerrar; divisiones: [[[x,y],...], ...] polilíneas abiertas o cerradas
+// Devuelve { vertices:[{id,x,y}], celdas:[{ids:[...], area, centro:[x,y]}], avisos:{...} }
+function subdividir(ring, divisiones, opc={}){
+  const TOL=opc.tol ?? 0.05, EXT=opc.ext ?? 0.25, AMIN=opc.areaMin ?? 0.5;
+  const segs=[];
+  for(let i=0;i<ring.length;i++) segs.push({a:ring[i], b:ring[(i+1)%ring.length], per:true});
+  for(const pl of divisiones){
+    for(let i=0;i<pl.length-1;i++){
+      let a=pl[i].slice(0,2), b=pl[i+1].slice(0,2);
+      const dx=b[0]-a[0], dy=b[1]-a[1], L=Math.hypot(dx,dy); if(L<1e-9) continue;
+      const ux=dx/L, uy=dy/L;
+      // se prolongan los extremos libres para atrapar líneas que "casi" llegan; lo que sobre se poda
+      if(i===0) a=[a[0]-ux*EXT, a[1]-uy*EXT];
+      if(i===pl.length-2) b=[b[0]+ux*EXT, b[1]+uy*EXT];
+      segs.push({a, b, per:false});
+    }
+  }
+  // puntos de corte por segmento (parámetro t en [0,1])
+  const cortes=segs.map(()=>[0,1]);
+  const proy=(p,s)=>{ const dx=s.b[0]-s.a[0], dy=s.b[1]-s.a[1], L2=dx*dx+dy*dy; let t=((p[0]-s.a[0])*dx+(p[1]-s.a[1])*dy)/L2; t=Math.max(0,Math.min(1,t)); return { t, d:Math.hypot(s.a[0]+t*dx-p[0], s.a[1]+t*dy-p[1]) }; };
+  for(let i=0;i<segs.length;i++) for(let j=i+1;j<segs.length;j++){
+    const s=segs[i], q=segs[j];
+    const r=[s.b[0]-s.a[0], s.b[1]-s.a[1]], u=[q.b[0]-q.a[0], q.b[1]-q.a[1]];
+    const den=r[0]*u[1]-r[1]*u[0];
+    if(Math.abs(den)>1e-12){
+      const w=[q.a[0]-s.a[0], q.a[1]-s.a[1]];
+      const t=(w[0]*u[1]-w[1]*u[0])/den, v=(w[0]*r[1]-w[1]*r[0])/den;
+      if(t>=-1e-9 && t<=1+1e-9 && v>=-1e-9 && v<=1+1e-9){ cortes[i].push(t); cortes[j].push(v); }
+    }
+    // extremos que tocan (o casi tocan) el otro segmento: incluye traslapes colineales
+    for(const [A,B,ia,ib] of [[s,q,i,j],[q,s,j,i]]){
+      for(const p of [A.a,A.b]){ const k=proy(p,B); if(k.d<TOL) cortes[ib].push(k.t); }
+    }
+  }
+  // vértices: se fusionan los puntos a menos de TOL
+  const pts=[], celda=new Map(), key=(x,y)=>`${Math.floor(x/TOL)},${Math.floor(y/TOL)}`;
+  function idDe(x,y){
+    const cx=Math.floor(x/TOL), cy=Math.floor(y/TOL);
+    for(let a=-1;a<=1;a++) for(let b=-1;b<=1;b++){
+      for(const id of celda.get(`${cx+a},${cy+b}`)||[]) if(Math.hypot(pts[id][0]-x,pts[id][1]-y)<TOL) return id;
+    }
+    const id=pts.length; pts.push([x,y]); const k=key(x,y); if(!celda.has(k)) celda.set(k,[]); celda.get(k).push(id); return id;
+  }
+  const dentro=([x,y])=>{ let d=false; for(let i=0,j=ring.length-1;i<ring.length;j=i++){ const [xi,yi]=ring[i],[xj,yj]=ring[j]; if(((yi>y)!==(yj>y)) && x<(xj-xi)*(y-yi)/(yj-yi)+xi) d=!d; } return d; };
+  const enBorde=p=>segs.some(s=>s.per && proy(p,s).d<TOL);
+  const aristas=new Map(); let fuera=0;
+  segs.forEach((s,i)=>{
+    const ts=[...new Set(cortes[i].map(t=>Math.round(t*1e9)/1e9))].sort((a,b)=>a-b);
+    let prev=null, prevP=null;
+    for(const t of ts){
+      const p=[s.a[0]+t*(s.b[0]-s.a[0]), s.a[1]+t*(s.b[1]-s.a[1])];
+      const id=idDe(p[0],p[1]);
+      if(prev!==null && id!==prev){
+        const m=[(prevP[0]+p[0])/2,(prevP[1]+p[1])/2];
+        if(s.per || dentro(m) || enBorde(m)){ const k=prev<id?`${prev}-${id}`:`${id}-${prev}`; aristas.set(k,[prev,id]); }
+        else fuera++;
+      }
+      prev=id; prevP=p;
+    }
+  });
+  // vecinos y poda de colgantes (líneas que no cierran)
+  const vec=new Map(); const add=(a,b)=>{ if(!vec.has(a)) vec.set(a,new Set()); vec.get(a).add(b); };
+  for(const [a,b] of aristas.values()){ add(a,b); add(b,a); }
+  let podadas=0, cambio=true;
+  while(cambio){ cambio=false;
+    for(const [v,ns] of vec) if(ns.size<=1){
+      // solo se reportan tramos reales; los sobrantes de la prolongación automática no cuentan
+      for(const n of ns){ vec.get(n).delete(v); if(Math.hypot(pts[v][0]-pts[n][0], pts[v][1]-pts[n][1]) > EXT+TOL) podadas++; }
+      vec.delete(v); cambio=true;
+    }
+  }
+  // caras: recorrido de medias aristas con la cara a la izquierda
+  const ang=(a,b)=>Math.atan2(pts[b][1]-pts[a][1], pts[b][0]-pts[a][0]);
+  const orden=new Map(); for(const [v,ns] of vec) orden.set(v,[...ns].sort((a,b)=>ang(v,a)-ang(v,b)));
+  const usada=new Set(), celdas=[];
+  for(const [u,ns] of vec) for(const v of ns){
+    if(usada.has(`${u}>${v}`)) continue;
+    const cara=[]; let a=u, b=v, guard=0;
+    while(!usada.has(`${a}>${b}`) && guard++<100000){
+      usada.add(`${a}>${b}`); cara.push(a);
+      const lst=orden.get(b), k=lst.indexOf(a);
+      const c=lst[(k-1+lst.length)%lst.length];   // siguiente en sentido horario desde la arista de regreso
+      a=b; b=c;
+    }
+    let ar=0; for(let i=0;i<cara.length;i++){ const p=pts[cara[i]], q=pts[cara[(i+1)%cara.length]]; ar+=p[0]*q[1]-q[0]*p[1]; } ar/=2;
+    if(ar>0) celdas.push({ ids:cara, area:ar });
+  }
+  const chicas=celdas.filter(c=>c.area<AMIN).length;
+  const finales=celdas.filter(c=>c.area>=AMIN).map(c=>{
+    let cx=0, cy=0; c.ids.forEach(i=>{ cx+=pts[i][0]; cy+=pts[i][1]; });
+    return { ...c, centro:[cx/c.ids.length, cy/c.ids.length] };
+  }).sort((a,b)=>(b.centro[1]-a.centro[1]) || (a.centro[0]-b.centro[0]));   // numeración: de arriba hacia abajo, izquierda a derecha
+  const usados=new Set(finales.flatMap(c=>c.ids));
+  return { vertices:[...usados].map(i=>({ id:`v${i}`, x:pts[i][0], y:pts[i][1] })),
+           celdas:finales.map(c=>({ ids:c.ids.map(i=>`v${i}`), area:c.area, centro:c.centro })),
+           avisos:{ podadas, fuera, chicas } };
+}
+
+const PROGRAMAS = { LIVING_UNIT:"Unidad", CORRIDOR:"Circulación", CORE:"Núcleo", PARKING:"Estacionamiento" };
+D.cfgEdif = {};      // por id de perímetro: { plantas, altura, subdiv, funcion, cota, celdas:{n:{fn,prog}} }
+D.edifs = [];
+const CELDA_ID = "dis-dxf-celda";
+
+function anilloCCW(r){ return areaFirmada(r)<0 ? r.slice().reverse() : r.slice(); }
+function calcularEdificios(){
+  const perims=activos().filter(p=>p.cerrado && tipoDe(p.capa)==="edificio");
+  const divs=activos().filter(p=>tipoDe(p.capa)==="division").map(p=>{ const r=ringLocal(p); return p.cerrado ? [...r, r[0]] : r; });
+  const funcDef = S.funciones[0]?.id ?? "";
+  D.edifs = perims.map((p,i)=>{
+    const ring=anilloCCW(ringLocal(p));
+    const xs=ring.map(q=>q[0]), ys=ring.map(q=>q[1]);
+    const bb=[Math.min(...xs)-1, Math.max(...xs)+1, Math.min(...ys)-1, Math.max(...ys)+1];
+    const cerca=divs.filter(l=>l.some(([x,y])=>x>=bb[0]&&x<=bb[1]&&y>=bb[2]&&y<=bb[3]));
+    const res=subdividir(ring, cerca);
+    if(!D.cfgEdif[p.id]) D.cfgEdif[p.id]={ plantas:1, altura:4.5, subdiv:"todas", funcion:funcDef, cota:null, celdas:{} };
+    return { id:p.id, nombre:`Edificio ${i+1}`, ring, area:Math.abs(areaFirmada(ring)), res, cfg:D.cfgEdif[p.id] };
+  });
+}
+const cotaDe = ed => ed.cfg.cota ?? D.terreno[ed.id]?.min ?? 0;
+
+function pintarEdificios(){
+  const bl=$("bloque-edif");
+  bl.hidden=!D.edifs.length;
+  if(!D.edifs.length) return;
+  const opcF = sel => `<option value="">— sin función —</option>` + S.funciones.map(f=>`<option value="${esc(f.id)}" ${f.id===sel?"selected":""}>${esc(f.name)}</option>`).join("");
+  const opcP = sel => Object.entries(PROGRAMAS).map(([k,v])=>`<option value="${k}" ${k===sel?"selected":""}>${v}</option>`).join("");
+  $("lista-edif").innerHTML = D.edifs.map(ed=>{
+    const c=ed.cfg, r=ed.res, av=[];
+    if(r.avisos.podadas) av.push(`${r.avisos.podadas} tramo(s) de división que no cierran: se ignoraron`);
+    if(r.avisos.chicas) av.push(`${r.avisos.chicas} celda(s) menores a 0.5 m² descartadas`);
+    const t=D.terreno[ed.id];
+    return `<div class="edif" data-ed="${ed.id}">
+      <div class="edif-cab"><b>${esc(ed.nombre)}</b> · ${fmt(ed.area)} m² · ${r.celdas.length} celda(s)</div>
+      ${av.length?`<p class="nota">${esc(av.join(" · "))}</p>`:""}
+      <div class="campos">
+        <label>Plantas<input type="number" min="1" step="1" data-cfg="plantas" value="${c.plantas}"></label>
+        <label>Entrepiso (m)<input type="number" min="2" step="0.1" data-cfg="altura" value="${c.altura}"></label>
+        <label>Desplante (m)<input type="number" step="0.1" data-cfg="cota" value="${(c.cota ?? t?.min)!=null ? (c.cota ?? t.min).toFixed(2) : ""}" placeholder="terreno" title="Por defecto: el punto más bajo del terreno bajo el perímetro"></label>
+      </div>
+      <div class="campos dos" style="margin-top:6px">
+        <label>Subdivisión en<select data-cfg="subdiv">
+          <option value="todas" ${c.subdiv==="todas"?"selected":""}>Todas las plantas</option>
+          <option value="pb" ${c.subdiv==="pb"?"selected":""}>Solo planta baja</option></select></label>
+        <label>Función por defecto<select data-cfg="funcion">${opcF(c.funcion)}</select></label>
+      </div>
+      <details${r.celdas.length>1?"":" hidden"}><summary>Celdas (${r.celdas.length}) — clic en una fila para ubicarla</summary>
+        <div class="scroll"><table>
+          <thead><tr><th>#</th><th class="n">m²</th><th>Función</th><th>Tipo</th></tr></thead>
+          <tbody>${r.celdas.map((cel,n)=>{ const cc=c.celdas[n]||{};
+            return `<tr data-celda="${n}" style="cursor:pointer"><td>${n+1}</td><td class="n">${fmt(cel.area,1)}</td>
+              <td><select data-cel="${n}" data-campo="fn" aria-label="Función de la celda ${n+1}">${opcF(cc.fn ?? c.funcion)}</select></td>
+              <td><select data-cel="${n}" data-campo="prog" aria-label="Tipo de la celda ${n+1}">${opcP(cc.prog ?? "LIVING_UNIT")}</select></td></tr>`; }).join("")}</tbody>
+        </table></div>
+      </details>
+    </div>`;
+  }).join("");
+  $("lista-edif").querySelectorAll(".edif").forEach(box=>{
+    const ed=D.edifs.find(e=>e.id===box.dataset.ed);
+    box.querySelectorAll("[data-cfg]").forEach(inp=>inp.addEventListener("change",()=>{
+      const k=inp.dataset.cfg, v=inp.value;
+      ed.cfg[k] = k==="plantas" ? Math.max(1,parseInt(v)||1) : k==="altura" ? (parseFloat(v)||4.5) : k==="cota" ? (v===""?null:parseFloat(v)) : v;
+      if(k==="funcion") Object.values(ed.cfg.celdas).forEach(cc=>{ if(cc.fn===undefined) delete cc.fn; });
+      pintarEdificios();
+    }));
+    box.querySelectorAll("select[data-cel]").forEach(sel=>sel.addEventListener("change",ev=>{
+      ev.stopPropagation();
+      const n=sel.dataset.cel; ed.cfg.celdas[n]=ed.cfg.celdas[n]||{}; ed.cfg.celdas[n][sel.dataset.campo]=sel.value;
+    }));
+    box.querySelectorAll("tr[data-celda]").forEach(tr=>tr.addEventListener("click",ev=>{
+      if(ev.target.tagName==="SELECT") return;
+      resaltarCelda(ed, +tr.dataset.celda);
+      box.querySelectorAll("tr[data-celda]").forEach(x=>x.classList.toggle("sel", x===tr));
+    }));
+  });
+}
+async function resaltarCelda(ed, n){
+  const cel=ed.res.celdas[n]; if(!cel) return;
+  const pos=Object.fromEntries(ed.res.vertices.map(v=>[v.id,[v.x,v.y]]));
+  const ring=cel.ids.map(id=>pos[id]);
+  try{ await Forma.render.geojson.update({ id:CELDA_ID, geojson:{ type:"FeatureCollection", features:[
+    { type:"Feature", properties:{}, geometry:{ type:"LineString", coordinates:[...ring, ring[0]] } }] } }); }catch(err){ console.error(err); }
+}
+
+// Construye el edificio con sus plantas y unidades, y lo coloca a su cota de desplante
+async function crearEdificio(ed){
+  const c=ed.cfg, r=ed.res;
+  const unidades=r.celdas.map((cel,n)=>{ const cc=c.celdas[n]||{}; const fn=cc.fn ?? c.funcion;
+    const u={ polygon:cel.ids, program:cc.prog ?? "LIVING_UNIT", holes:[] }; if(fn) u.functionId=fn; return u; });
+  const plans=[{ id:"sub", vertices:r.vertices, units:unidades }];
+  const plantas=Math.max(1,c.plantas|0);
+  if(c.subdiv==="pb" && plantas>1){
+    const verts=ed.ring.map(([x,y],i)=>({ id:`p${i}`, x, y }));
+    const u={ polygon:verts.map(v=>v.id), program:"LIVING_UNIT", holes:[] }; if(c.funcion) u.functionId=c.funcion;
+    plans.push({ id:"completa", vertices:verts, units:[u] });
+  }
+  const floors=Array.from({length:plantas},(_,k)=>({ planId:(c.subdiv==="pb" && k>0) ? "completa" : "sub", height:c.altura }));
+  const { urn } = await Forma.elements.floorStack.createFromFloors({ floors, plans });
+  const z=cotaDe(ed);
+  const { path } = await Forma.elements.add({ urn, name:ed.nombre, transform:[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,z,1] });
+  return path;
+}
+
+let tMuestreo=null;
+function muestrearTerreno(){
+  clearTimeout(tMuestreo);
+  tMuestreo=setTimeout(async ()=>{
+    for(const p of activos().filter(p=>p.cerrado && ["plataforma","edificio"].includes(tipoDe(p.capa)))){
+      const r=ringLocal(p), paso=Math.max(1,Math.floor(r.length/30));
+      const m=r.filter((_,i)=>i%paso===0);
+      m.push([r.reduce((s,q)=>s+q[0],0)/r.length, r.reduce((s,q)=>s+q[1],0)/r.length]);
+      const zs=[];
+      for(const [x,y] of m){ try{ const z=await Forma.terrain.getElevationAt({x,y}); if(isFinite(z)) zs.push(z); }catch(_){} }
+      if(zs.length) D.terreno[p.id]={ min:Math.min(...zs), max:Math.max(...zs), prom:zs.reduce((s,v)=>s+v,0)/zs.length };
+    }
+    pintarDxf();
+  }, 250);
+}
+
+/* --- previsualización --- */
+const geojsonPreview = () => ({ type:"FeatureCollection", features: activos().filter(p=>p.cerrado || tipoDe(p.capa)==="division").map(p=>({
+  type:"Feature", properties:{ tipo:tipoDe(p.capa) }, geometry:{ type:"LineString", coordinates: p.cerrado ? anillo(ringLocal(p)) : ringLocal(p) } })) });
+async function refrescarPreview(){
+  if(!D.preview) return;
+  try{ await Forma.render.geojson.update({ id:PREVIEW_ID, geojson:geojsonPreview() }); }catch(err){ console.error(err); }
+}
+async function quitarPreview(){
+  D.preview=false; $("btn-prev").textContent="Previsualizar en escena";
+  try{ await Forma.render.geojson.remove({ id:PREVIEW_ID }); }catch(_){}
+  try{ await Forma.render.geojson.remove({ id:CELDA_ID }); }catch(_){}
+}
+$("btn-prev").addEventListener("click", ()=>{
+  if(D.preview) return quitarPreview();
+  D.preview=true; $("btn-prev").textContent="Quitar previsualización"; refrescarPreview();
+});
+["dxf-modo","dxf-unid","dxf-dx","dxf-dy","dxf-rot"].forEach(id=>$(id).addEventListener("change",()=>{
+  $("dxf-manual").hidden = $("dxf-modo").value!=="local";
+  D.terreno={}; pintarDxf(); muestrearTerreno(); refrescarPreview();
+}));
+
+/* --- plantillas --- */
+document.querySelectorAll("[data-plantilla]").forEach(b=>b.addEventListener("click", async ()=>{
+  const tipo=b.dataset.plantilla;
+  try{
+    const sel=await Forma.selection.getSelection();
+    if(sel.length!==1) throw new Error("selecciona exactamente un elemento en la escena");
+    const { element } = await Forma.elements.getByPath({ path:sel[0] });
+    const props={ ...(element.properties||{}) }; delete props.name;
+    D.plantillas[tipo]=props; guardarG("plantillas",D.plantillas); pintarDxf();
+    estado(`Plantilla de ${TIPOS[tipo].toLowerCase()} guardada. Representaciones de la muestra: ${Object.keys(element.representations||{}).join(", ")||"ninguna"}.`);
+  }catch(err){ estado(`No se pudo tomar la plantilla: ${err.message}.`, true); }
+}));
+
+/* --- historial: Aplicar / Volver --- */
+const guardarHist = () => guardar("historial-dxf", D.historial);
+function pintarHist(){
+  const h=D.historial;
+  $("hist-lista").innerHTML = h.length ? h.slice().reverse().map((e,i)=>`
+    <div class="grupo"><label>${esc(e.resumen||"Aplicación incompleta")}<br><small>${new Date(e.fecha).toLocaleString("es-MX",{dateStyle:"short",timeStyle:"short"})}${e.origen?` · ${esc(e.origen)}`:""}</small></label>${i===0?'<span class="etq">última</span>':""}</div>`).join("")
+    : '<p class="vacio">Todavía no hay nada aplicado.</p>';
+  $("btn-dxf-volver").disabled = !h.length;
+}
+
+$("btn-dxf-aplicar").addEventListener("click", async ()=>{
+  const btn=$("btn-dxf-aplicar"); btn.disabled=true;
+  const entrada={ fecha:new Date().toISOString(), propuesta:null, origen:D.fuente==="escena"?"desde la escena":"desde archivo", paths:[], padIds:[], resumen:"" };
+  const res=[], avisos=[];
+  try{
+    if(!(await Forma.getCanEdit())) throw new Error("no tienes permisos de edición en este proyecto");
+    const cerr=activos().filter(p=>p.cerrado);
+    if(!cerr.length && !D.edifs.length) throw new Error("no hay contornos cerrados asignados a un tipo");
+    entrada.propuesta = await Forma.proposal.getId();
+    D.historial.push(entrada); guardarHist();         // se registra antes de crear: si algo falla, "Volver" limpia lo parcial
+    estado("Aplicando en Forma…");
+
+    // edificios con subdivisión
+    let nEd=0;
+    for(const ed of D.edifs){
+      const path=await crearEdificio(ed);
+      entrada.paths.push(path); guardarHist(); nEd++;
+    }
+    if(nEd) res.push(`${nEd} edificio(s) con ${D.edifs.reduce((s,e)=>s+e.res.celdas.length,0)} unidad(es) por planta`);
+
+    const cont={limite:0, zona:0}; let enBiblioteca=0;
+    entrada.libIds=[];
+    for(const p of cerr.filter(p=>["limite","zona"].includes(tipoDe(p.capa)))){
+      const tipo=tipoDe(p.capa); cont[tipo]++;
+      const nombre=`${p.capa} ${cont[tipo]}`;
+      if(tipo==="limite" && $("lim-metodo").value==="nativo"){
+        // Vía documentada para linderos: Forma los procesa como límite de predio nativo
+        const P=S.proyecto || await Forma.project.get();
+        const item = await Forma.geoData.upload({
+          data:{ type:"FeatureCollection", features:[{ type:"Feature", properties:{ name:nombre }, geometry:{ type:"Polygon", coordinates:[anillo(ringLocal(p))] } }] },
+          dataType:"property-boundaries",
+          geoLocation:{ srid:P.srid, refPoint:P.refPoint }
+        });
+        entrada.libIds.push(item.id); guardarHist();
+        if(item.status==="success" && item.urn){
+          const { path } = await Forma.elements.add({ urn:item.urn, name:nombre });
+          entrada.paths.push(path); guardarHist();
+        } else enBiblioteca++;
+        continue;
+      }
+      const fc={ type:"FeatureCollection", features:[{ type:"Feature", properties:{}, geometry:{ type:"Polygon", coordinates:[anillo(ringLocal(p))] } }] };
+      const { urn } = await Forma.integrateElements.createElementV2({
+        properties:{ ...D.plantillas[tipo], name:nombre },
+        representations:{ footprint:{ type:"embedded-json", data:fc } }
+      });
+      const { path } = await Forma.elements.add({ urn, name:nombre });
+      entrada.paths.push(path); guardarHist();
+    }
+    if(cont.limite) res.push(`${cont.limite} límite(s)`);
+    if(enBiblioteca) avisos.push(`${enBiblioteca} límite(s) quedaron en la Biblioteca de Forma mientras se procesan: arrástralos a la escena desde Biblioteca (nombre "${cerr.find(p=>tipoDe(p.capa)==="limite")?.capa ?? "límite"} n").`);
+    if(cont.zona) res.push(`${cont.zona} zona(s)`);
+
+    const pads=cerr.filter(p=>tipoDe(p.capa)==="plataforma");
+    if(pads.length){
+      if(!(await Forma.terrain.isInternal())){
+        avisos.push("Las plataformas no se crearon: el terreno viene de una fuente externa y Forma solo permite plataformas sobre terreno interno.");
+      }else{
+        const conTalud=$("pad-talud-on").value==="1", hv=parseFloat($("pad-talud").value)||1.5;
+        const sello=Date.now().toString(36);
+        const lista=pads.map((p,i)=>{
+          const nivel=nivelDe(p);
+          if(!isFinite(nivel)) throw new Error(`la plataforma ${i+1} no tiene nivel`);
+          const pad={ id:`dis-${sello}-${i}`, coordinates:anillo(ringLocal(p)).slice(0,-1).map(([x,y])=>({x,y})), elevation:nivel, applySlope:conTalud };
+          if(conTalud) pad.slopePercentage=100/hv;
+          return pad;
+        });
+        entrada.padIds=lista.map(p=>p.id); guardarHist();
+        await Forma.terrain.addPads(lista);
+        res.push(`${lista.length} plataforma(s)`);
+      }
+    }
+    entrada.resumen = res.join(", ") || "sin cambios";
+    guardarHist();
+
+    if(cont.limite){
+      try{
+        const sa=val((await Forma.areaMetrics.calculate({})).builtInMetrics.siteArea);   // toda la escena: incluye lo recién creado
+        avisos.push(isFinite(sa)&&sa>0 ? `Forma reconoce el predio: ${fmt(sa)} m².`
+          : "Forma no está contando los límites como predio. Usa Volver, guarda una plantilla desde un límite dibujado a mano y aplica de nuevo.");
+      }catch(_){}
+    }
+    await quitarPreview();
+    $("dxf-res").innerHTML=`<div class="aviso ok">Aplicado: ${esc(entrada.resumen)}.</div>`+avisos.map(a=>`<p class="nota">${esc(a)}</p>`).join("");
+    estado("Aplicado. Si algo no quedó bien, usa Volver.");
+  }catch(err){
+    console.error(err);
+    if(entrada.propuesta && !entrada.paths.length && !entrada.padIds.length && !(entrada.libIds||[]).length){ D.historial.pop(); }
+    else if(entrada.propuesta){ entrada.resumen = `Parcial: ${res.join(", ")||"elementos sueltos"} (falló a medias)`; }
+    guardarHist();
+    $("dxf-res").innerHTML=`<div class="aviso">Se detuvo: ${esc(err.message)}.${entrada.paths.length||entrada.padIds.length?" Lo que alcanzó a crearse se puede deshacer con Volver.":""}</div>`;
+    estado("No se completó la aplicación.", true);
+  }finally{ btn.disabled=false; pintarHist(); }
+});
+
+$("btn-dxf-volver").addEventListener("click", async ()=>{
+  const e=D.historial[D.historial.length-1]; if(!e) return;
+  const btn=$("btn-dxf-volver"); btn.disabled=true;
+  try{
+    const actual=await Forma.proposal.getId();
+    if(e.propuesta && actual!==e.propuesta) throw new Error("esa aplicación se hizo en otra propuesta: ábrela para deshacerla");
+    estado("Deshaciendo…");
+    let fallos=0;
+    for(const path of e.paths.slice().reverse()){
+      try{ await Forma.elements.remove({ path }); }catch(_){ fallos++; }   // si ya se borró a mano, se ignora
+    }
+    for(const id of e.libIds||[]){ try{ await Forma.library.deleteItem({ id }); }catch(_){} }
+    if(e.padIds.length){
+      const quedan=(await Forma.terrain.getPads()).filter(p=>!e.padIds.includes(p.id));
+      await Forma.terrain.applyPads(quedan);   // conserva las plataformas que no vienen de esta aplicación
+    }
+    D.historial.pop(); guardarHist();
+    $("dxf-res").innerHTML=`<div class="aviso ok">Deshecho: ${esc(e.resumen)}.${fallos?` ${fallos} elemento(s) ya no existían.`:""}</div>`;
+    estado("Se deshizo la última aplicación.");
+  }catch(err){ console.error(err); estado(`No se pudo deshacer: ${err.message}.`, true); }
+  finally{ pintarHist(); }
+});
+
+pintarHist();
+
+/* ---------- arranque ---------- */
+Forma.proposal.subscribe(()=>leer(), { debouncedPersistedOnly:true });
+leer();
+</script>
+</body>
+</html>
